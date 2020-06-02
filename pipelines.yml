@@ -272,10 +272,10 @@ pipelines:
             - values.yaml
         execution:
           onStart:
-            #- helm init --service-account tiller --tiller-namespace default
+            - helm init --service-account tiller --tiller-namespace default
             - helm version
-            #- helm del --purge docker-app-chart
-            #- helm list
+            - helm del --purge docker-app-chart
+            - helm list
             - kubectl version
           onSuccess:
             - echo "Job well done!"
