@@ -257,16 +257,10 @@ pipelines:
             - values.yaml
         execution:
           onStart:
-            - curl -LO https://git.io/get_helm.sh
-            - chmod 700 get_helm.sh
-            - ./get_helm.sh
-            - helm repo add jfrog https://charts.jfrog.io/
-            - helm repo update
             #- helm init --service-account tiller --tiller-namespace default
-            #- helm version
+            - helm version
             #- helm del --purge docker-app-chart
             #- helm list
-            - gcloud container clusters get-credentials k8s-soleng-us-demo --zone us-west1-c --project soleng-prod
             - kubectl version
           onSuccess:
             - echo "Job well done!"
