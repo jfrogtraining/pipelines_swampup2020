@@ -26,6 +26,12 @@ resources:
       sourceArtifactory: ArtifactoryUnified
       buildName: SampleApp
       buildNumber: 1
+  - name: myPromotedHelmBuildInfo
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: ArtifactoryUnified
+      buildName: SampleApp
+      buildNumber: 1
   - name: MyHelmChart
     type: HelmChart
     configuration:
@@ -241,6 +247,17 @@ pipelines:
             - echo "uh oh, something went wrong"
           onComplete: #always
             - echo "Cleaning up some stuff"
+      - name: promote_helm_chart
+        type: PromoteBuild
+        configuration:
+          targetRepository: helm-prod-local
+          integrations:
+            - name: ArtifactoryUnified
+            - name: Github_SolEng
+          inputResources:
+            - name: myHelmBuildInfo
+          outputResources:
+            - name: myPromotedHelmBuildInfo
       - name: deploy_helm
         type: HelmDeploy
         configuration:
@@ -279,7 +296,7 @@ pipelines:
           sign: false
           description: "some random test description"
           inputResources:
-            - name: myHelmBuildInfo
+            - name: myPromotedHelmBuildInfo
               trigger: false
             - name: myPromotedBuildInfo
               trigger: false
