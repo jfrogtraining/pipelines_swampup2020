@@ -222,6 +222,8 @@ pipelines:
           #inherits from bash
           chartPath: docker-app-chart/
           autoPublishBuildInfo: true                    # default false         
+          integrations:
+            - name: GCP
           inputResources:
             - name: myGitRepo
           outputResources:
