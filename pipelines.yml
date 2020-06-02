@@ -1,0 +1,317 @@
+resources:
+  - name: myGitRepo
+    type: GitRepo
+    configuration:
+      gitProvider: Github_SolEng
+      path: jfrog/SolEngDemo
+      branches:
+        include: swampup-pipelines
+      buildOn:
+        commit: false
+  - name: myBuildInfo
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: ArtifactoryUnified
+      buildName: SampleApp
+      buildNumber: 1
+  - name: myPromotedBuildInfo
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: ArtifactoryUnified
+      buildName: SampleApp
+      buildNumber: 1
+  - name: myHelmBuildInfo
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: ArtifactoryUnified
+      buildName: SampleApp
+      buildNumber: 1
+  - name: MyHelmChart
+    type: HelmChart
+    configuration:
+      sourceArtifactory: ArtifactoryUnified
+      repository: helm-local
+      chart: docker-app-chart
+      version: '1.${run_number}'
+  - name: myReleaseBundle
+    type: ReleaseBundle
+    configuration:
+      sourceDistribution: Distribution
+      name: simple_rb
+      version: v1.0.0
+  - name: mySignedReleaseBundle
+    type: ReleaseBundle
+    configuration:
+      sourceDistribution: Distribution
+      name: demo_rb
+      version: v1.0.0
+  - name: myDistributionRules
+    type: DistributionRule
+    configuration:
+      sourceDistribution: Distribution
+      serviceName: "Edge*"
+      siteName: "Edge*"
+      cityName: "*"
+      countryCodes:
+        - "*"
+pipelines:
+  - name: basic_pipeline
+    configuration:
+      environmentVariables:
+        readOnly:
+          #my_env_var: "hello"
+           my_env_var: '1.0.$run_number'
+    steps:
+      - name: bld_backend
+        type: MvnBuild
+        configuration:
+          sourceLocation: Pipelines/go-java-docker-pipeline/java-backend-service
+          mvnCommand: clean install -ntp
+          configFileLocation: .
+          configFileName: mvn-art-config
+          inputResources:
+            - name: myGitRepo
+            #- name: myBuildInfo
+          integrations:
+            - name: ArtifactoryUnified
+          runtime:
+            type: image
+            image:
+              auto:
+                language: java
+                versions:
+                  - "11"
+        execution:
+          onStart:
+            - javac -version
+            - mvn --version
+            - add_pipeline_variables previous_backend_ver=${my_env_var}
+            - sed -ie 's/Default-Server/ArtifactoryUnified/g' $res_myGitRepo_resourcePath/Pipelines/go-java-docker-pipeline/java-backend-service/mvn-art-config
+            - sed -ie "s/1.0.0/$my_env_var/g" $res_myGitRepo_resourcePath/Pipelines/go-java-docker-pipeline/java-backend-service/pom.xml
+          onComplete:
+            - echo $run_var
+            #- echo $res_myBuildInfo_buildNumber
+            - echo "Running $pipeline_name | $step_name on node ID $step_node_id"
+      - name: bld_frontend
+        type: Bash
+        configuration:
+          environmentVariables:
+            step_env_var2: "hello"
+            server_name: ArtifactoryUnified
+            repositoryName : npm
+            #npmArgs: --no-progress --no-audit
+          inputResources:
+            - name: myGitRepo
+              trigger: false
+          integrations:
+            - name: ArtifactoryUnified
+        execution:
+          onStart:
+            - rm -rf $run_dir/workspace/jfrog
+            - pushd $res_myGitRepo_resourcePath/Pipelines/go-java-docker-pipeline/npm-frontend-service
+            - add_run_variables buildStepName=${step_name}
+            - add_run_variables ${step_name}_buildNumber=${run_number}
+            - add_run_variables ${step_name}_buildName=${pipeline_name}
+            - add_pipeline_variables previous_frontend_ver=${my_env_var}
+            - sed -i "s/3.0.0/$my_env_var/g" package.json
+            - curl -fL https://getcli.jfrog.io | sh 
+            - ./jfrog rt config --url $int_ArtifactoryUnified_url --user $int_ArtifactoryUnified_user --apikey $int_ArtifactoryUnified_apikey --interactive=false
+            - ./jfrog rt c show
+            - ./jfrog rt npmc --server-id-resolve $server_name --server-id-deploy $server_name --repo-resolve $repositoryName --repo-deploy $repositoryName
+            - ./jfrog rt npm-install --build-name=$pipeline_name --build-number=$run_number
+            #- ./jfrog rt bag $pipeline_name $run_number --config issuesCollectionConfig.json"
+            - ./jfrog rt bce $pipeline_name $run_number
+            - ./jfrog rt npm-publish --build-name=$pipeline_name --build-number=$run_number
+            - ./jfrog rt bp $pipeline_name $run_number
+            - ./jfrog rt bs $pipeline_name $run_number --fail=false
+            - add_run_files /tmp/jfrog/. jfrog
+          onComplete:
+            - echo $step_env_var2
+            - echo "Running $pipeline_name | $step_name on node ID $step_node_id"
+      - name: bld_docker_app
+        type: DockerBuild
+        configuration:
+          affinityGroup: fmkGroup
+          dockerFileLocation: Pipelines/go-java-docker-pipeline
+          dockerFileName: Dockerfile
+          dockerImageName: docker.artifactory-unified.soleng-us.jfrog.team/simple_pipeline_app_demo
+          dockerImageTag: '${run_number}'
+          integrations:
+            - name: ArtifactoryUnified
+          inputResources:
+            - name: myGitRepo
+          inputSteps:
+            - name: bld_backend
+            - name: bld_frontend
+        execution:
+          onStart:
+            - if [ -z $app_version ]; then add_pipeline_variables app_version=1.0.0; else add_pipeline_variables app_version=$(bump_semver $app_version minor); fi
+            - echo $app_version
+            - add_pipeline_variables latest_docker_ver='$run_number'
+            - sed -i "s/frontend-3.0.0/frontend-$previous_frontend_ver/g" $res_myGitRepo_resourcePath/Pipelines/go-java-docker-pipeline/Dockerfile
+            - sed -i "s/1.0.0/$previous_backend_ver/g" $res_myGitRepo_resourcePath/Pipelines/go-java-docker-pipeline/Dockerfile
+          onComplete:
+            - echo $step_env_var2
+            - echo "Running $pipeline_name | $step_name on node ID $step_node_id"
+      - name: push_docker_app
+        type: DockerPush
+        configuration:
+          affinityGroup: fmkGroup
+          targetRepository: docker
+          forceXrayScan: true
+          autoPublishBuildInfo: true
+          integrations:
+            - name: ArtifactoryUnified
+          inputSteps:
+            - name: bld_docker_app
+          outputResources:
+            - name: myBuildInfo
+      - name: promote_docker_app
+        type: PromoteBuild
+        configuration:
+          #affinityGroup: fmkGroup
+          targetRepository: docker-prod-local
+          integrations:
+            - name: ArtifactoryUnified
+            - name: SlackSolEng
+            - name: Github_SolEng
+          #inputSteps:
+          #  - name: pushDockerApp
+          inputResources:
+            - name: myBuildInfo
+          outputResources:
+            - name: myPromotedBuildInfo
+        execution:
+          onStart:
+            - curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X DELETE $int_ArtifactoryUnified_url/docker-prod-local/simple_pipeline_app_demo/latest
+            - 'curl -H "Authorization: token ${int_Github_SolEng_token}" ${int_Github_SolEng_url}/rate_limit'
+            #- echo "Running $pipeline_name | $step_name on node ID $step_node_id"
+            - add_pipeline_variables prev_runid=$run_id
+            - echo $app_version
+            - echo $latest_docker_ver
+            #- echo $current_runid Completed
+          onSuccess:
+            - >-
+              curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey $int_ArtifactoryUnified_url/api/docker/docker-prod-local/v2/promote
+              -X POST -H 'Content-Type:application/json' -d
+              '{"targetRepo":"docker-prod-local", "dockerRepository":"simple_pipeline_app_demo", "tag":"'"$run_number"'", "targetTag":"latest", "copy":true}'
+            - curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X PUT $int_ArtifactoryUnified_url/api/storage/docker-prod-local/simple_pipeline_app_demo/latest/manifest.json?properties=docker.refersTo=$run_number
+            - send_notification SlackSolEng --text "successfully completed $pipeline_name version $app_version"
+      - name: helm_build
+        type: HelmPublish
+        configuration:
+          #inherits from bash
+          chartPath: Pipelines/go-java-docker-pipeline/docker-app-chart/
+          autoPublishBuildInfo: true                    # default false         
+          inputSteps:
+            - name: promote_docker_app
+          inputResources:
+            - name: myGitRepo
+          outputResources:
+            - name: MyHelmChart
+            - name: myHelmBuildInfo
+        execution:
+          onStart:
+            - echo "Preparing for work..."
+            - pushd $res_myGitRepo_resourcePath/Pipelines/go-java-docker-pipeline/docker-app-chart
+            - sed -i "s/docker.artifactory/docker.artifactory-unified.soleng-us.jfrog.team/" values.yaml
+            - sed -i "s/docker-app/simple_pipeline_app_demo/" values.yaml
+            - sed -i "s/0.1.1/0.1.$run_number/g" Chart.yaml
+            #- sed -i "s/111/$latest_docker_ver/g" values.yaml
+          onSuccess:
+            - echo "Job well done!"
+          onFailure:
+            - echo "uh oh, something went wrong"
+          onComplete: #always
+            - echo "Cleaning up some stuff"
+#   - name: helm_test
+#     steps:
+#       - name: helm_build
+#         type: HelmPublish
+#         configuration:
+#           #inherits from bash
+#           chartPath: Pipelines/go-java-docker-pipeline/docker-app-chart/
+#           autoPublishBuildInfo: true                    # default false         
+#           inputResources:
+#             - name: myGitRepo
+#           outputResources:
+#             - name: MyHelmChart
+#             - name: myHelmBuildInfo
+#         execution:
+#           onStart:
+#             - echo "Preparing for work..."
+#             - pushd $res_myGitRepo_resourcePath/Pipelines/go-java-docker-pipeline/docker-app-chart
+#             - sed -i "s/docker.artifactory/docker.artifactory-unified.soleng-us.jfrog.team/" values.yaml
+#             - sed -i "s/docker-app/simple_pipeline_app_demo/" values.yaml
+#             - sed -i "s/0.1.1/0.1.$run_number/g" Chart.yaml
+#             #- sed -i "s/111/$latest_docker_ver/g" values.yaml
+#           onSuccess:
+#             - echo "Job well done!"
+#           onFailure:
+#             - echo "uh oh, something went wrong"
+#           onComplete: #always
+#             - echo "Cleaning up some stuff"
+#       - name: deploy_helm
+#         type: HelmDeploy
+#         configuration:
+#           releaseName: docker-app-chart
+#           chartPath:   .
+#           integrations:
+#             - name: K8S_SolEngUS
+#           inputResources:
+#             - name: MyHelmChart
+#           flags: '--namespace default'
+#           valueFilePaths:
+#             - values.yaml
+#         execution:
+#           onStart:
+#             - helm init --service-account tiller --tiller-namespace default
+#             - helm version
+#             - helm del --purge docker-app-chart
+#             - helm list
+#           onSuccess:
+#             - echo "Job well done!"
+#             - kubectl get pods --namespace default
+#           onFailure:
+#             - echo "uh oh, something went wrong"
+#           onComplete: #always
+#             - echo "Cleaning up some stuff"
+            
+  - name: simple_release_mgmt
+    steps:
+      - name: release_bundle
+        type: CreateReleaseBundle
+        configuration:
+          releaseBundleName: simple_rb
+          releaseBundleVersion: v1.0.${run_number}
+          dryRun: false
+          sign: false
+          description: "some random test description"
+          inputResources:
+            - name: myHelmBuildInfo
+              trigger: false
+            - name: myPromotedBuildInfo
+              trigger: false
+          outputResources:
+            - name: myReleaseBundle
+          releaseNotes:
+            syntax: markdown
+            content: |
+              ## Heading
+                * Bullet
+                * Points
+      - name: signBundle
+        type: SignReleaseBundle
+        configuration:
+          inputResources:
+            - name: myReleaseBundle
+          outputResources:
+            - name: mySignedReleaseBundle
+
+      - name: distributeBundle
+        type: DistributeReleaseBundle
+        configuration:
+          dryRun: false
+          inputResources:
+            - name: mySignedReleaseBundle
+            - name: myDistributionRules
