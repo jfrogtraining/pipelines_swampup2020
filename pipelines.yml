@@ -2,10 +2,10 @@ resources:
   - name: myGitRepo
     type: GitRepo
     configuration:
-      gitProvider: Github_SolEng
-      path: jfrog/SolEngDemo
+      gitProvider: Github_jfrogtraining
+      path: jfrogtraining/pipelines_swampup2020
       branches:
-        include: swampup-pipelines
+        include: master
       buildOn:
         commit: false
   - name: myBuildInfo
@@ -65,7 +65,7 @@ pipelines:
       - name: bld_backend
         type: MvnBuild
         configuration:
-          sourceLocation: Pipelines/go-java-docker-pipeline/java-backend-service
+          sourceLocation: java-backend-service
           mvnCommand: clean install -ntp
           configFileLocation: .
           configFileName: mvn-art-config
@@ -86,8 +86,8 @@ pipelines:
             - javac -version
             - mvn --version
             - add_pipeline_variables previous_backend_ver=${my_env_var}
-            - sed -ie 's/Default-Server/ArtifactoryUnified/g' $res_myGitRepo_resourcePath/Pipelines/go-java-docker-pipeline/java-backend-service/mvn-art-config
-            - sed -ie "s/1.0.0/$my_env_var/g" $res_myGitRepo_resourcePath/Pipelines/go-java-docker-pipeline/java-backend-service/pom.xml
+            - sed -ie 's/Default-Server/ArtifactoryUnified/g' $res_myGitRepo_resourcePath/java-backend-service/mvn-art-config
+            - sed -ie "s/1.0.0/$my_env_var/g" $res_myGitRepo_resourcePath/java-backend-service/pom.xml
           onComplete:
             - echo $run_var
             #- echo $res_myBuildInfo_buildNumber
@@ -108,7 +108,7 @@ pipelines:
         execution:
           onStart:
             - rm -rf $run_dir/workspace/jfrog
-            - pushd $res_myGitRepo_resourcePath/Pipelines/go-java-docker-pipeline/npm-frontend-service
+            - pushd $res_myGitRepo_resourcePath/npm-frontend-service
             - add_run_variables buildStepName=${step_name}
             - add_run_variables ${step_name}_buildNumber=${run_number}
             - add_run_variables ${step_name}_buildName=${pipeline_name}
@@ -132,7 +132,7 @@ pipelines:
         type: DockerBuild
         configuration:
           affinityGroup: fmkGroup
-          dockerFileLocation: Pipelines/go-java-docker-pipeline
+          dockerFileLocation: .
           dockerFileName: Dockerfile
           dockerImageName: docker.artifactory-unified.soleng-us.jfrog.team/simple_pipeline_app_demo
           dockerImageTag: '${run_number}'
@@ -148,8 +148,8 @@ pipelines:
             - if [ -z $app_version ]; then add_pipeline_variables app_version=1.0.0; else add_pipeline_variables app_version=$(bump_semver $app_version minor); fi
             - echo $app_version
             - add_pipeline_variables latest_docker_ver='$run_number'
-            - sed -i "s/frontend-3.0.0/frontend-$previous_frontend_ver/g" $res_myGitRepo_resourcePath/Pipelines/go-java-docker-pipeline/Dockerfile
-            - sed -i "s/1.0.0/$previous_backend_ver/g" $res_myGitRepo_resourcePath/Pipelines/go-java-docker-pipeline/Dockerfile
+            - sed -i "s/frontend-3.0.0/frontend-$previous_frontend_ver/g" $res_myGitRepo_resourcePath/Dockerfile
+            - sed -i "s/1.0.0/$previous_backend_ver/g" $res_myGitRepo_resourcePath/Dockerfile
           onComplete:
             - echo $step_env_var2
             - echo "Running $pipeline_name | $step_name on node ID $step_node_id"
@@ -201,7 +201,7 @@ pipelines:
         type: HelmPublish
         configuration:
           #inherits from bash
-          chartPath: Pipelines/go-java-docker-pipeline/docker-app-chart/
+          chartPath: docker-app-chart/
           autoPublishBuildInfo: true                    # default false         
           inputSteps:
             - name: promote_docker_app
@@ -213,7 +213,7 @@ pipelines:
         execution:
           onStart:
             - echo "Preparing for work..."
-            - pushd $res_myGitRepo_resourcePath/Pipelines/go-java-docker-pipeline/docker-app-chart
+            - pushd $res_myGitRepo_resourcePath/docker-app-chart
             - sed -i "s/docker.artifactory/docker.artifactory-unified.soleng-us.jfrog.team/" values.yaml
             - sed -i "s/docker-app/simple_pipeline_app_demo/" values.yaml
             - sed -i "s/0.1.1/0.1.$run_number/g" Chart.yaml
