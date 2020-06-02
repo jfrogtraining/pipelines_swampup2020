@@ -37,13 +37,13 @@ resources:
     type: ReleaseBundle
     configuration:
       sourceDistribution: Distribution
-      name: simple_rb
+      name: swampup_rb
       version: v1.0.0
   - name: mySignedReleaseBundle
     type: ReleaseBundle
     configuration:
       sourceDistribution: Distribution
-      name: demo_rb
+      name: swampup_rb
       version: v1.0.0
   - name: myDistributionRules
     type: DistributionRule
@@ -267,12 +267,12 @@ pipelines:
 #           onComplete: #always
 #             - echo "Cleaning up some stuff"
             
-  - name: simple_release_mgmt
+  - name: swampup_release_mgmt
     steps:
       - name: release_bundle
         type: CreateReleaseBundle
         configuration:
-          releaseBundleName: simple_rb
+          releaseBundleName: swampup_rb
           releaseBundleVersion: v1.0.${run_number}
           dryRun: false
           sign: false
