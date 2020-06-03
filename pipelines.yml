@@ -247,7 +247,7 @@ pipelines:
           releaseName: docker-app-chart
           chartPath:   .
           integrations:
-            - name: K8S_SolEngUS
+            - name: K8S_SA #SolEngUS
           inputResources:
             - name: MyPromotedHelmChart
           flags: '--namespace default'
