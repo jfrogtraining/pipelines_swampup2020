@@ -38,14 +38,14 @@ resources:
       sourceArtifactory: ArtifactoryUnified
       repository: helm-local
       chart: docker-app-chart
-      version: '1.${run_number}'
+      version: '0.1.${run_number}'
   - name: MyPromotedHelmChart
     type: HelmChart
     configuration:
       sourceArtifactory: ArtifactoryUnified
       repository: helm-prod-local
       chart: docker-app-chart
-      version: '1.${run_number}'
+      version: '0.1.${run_number}'
   - name: myReleaseBundle
     type: ReleaseBundle
     configuration:
