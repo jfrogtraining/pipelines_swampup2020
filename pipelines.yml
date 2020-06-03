@@ -247,9 +247,7 @@ pipelines:
           releaseName: docker-app-chart
           chartPath:   .
           integrations:
-            - name: K8S_SA
-          #inputSteps:
-          #  - name: promote_helm_chart
+            - name: K8S_SolEngUS
           inputResources:
             - name: MyPromotedHelmChart
           flags: '--namespace default'
