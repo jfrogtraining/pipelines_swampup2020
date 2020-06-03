@@ -253,11 +253,12 @@ pipelines:
           targetRepository: helm-prod-local
           integrations:
             - name: ArtifactoryUnified
-            - name: Github_SolEng
           inputResources:
             - name: myHelmBuildInfo
+            - name: MyHelmChart
           outputResources:
             - name: myPromotedHelmBuildInfo
+            - name: MyHelmChart
       - name: deploy_helm
         type: HelmDeploy
         configuration:
