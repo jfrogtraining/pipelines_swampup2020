@@ -39,6 +39,13 @@ resources:
       repository: helm-local
       chart: docker-app-chart
       version: '1.${run_number}'
+  - name: MyPromotedHelmChart
+    type: HelmChart
+    configuration:
+      sourceArtifactory: ArtifactoryUnified
+      repository: helm-prod-local
+      chart: docker-app-chart
+      version: '1.${run_number}'
   - name: myReleaseBundle
     type: ReleaseBundle
     configuration:
@@ -258,7 +265,7 @@ pipelines:
             - name: MyHelmChart
           outputResources:
             - name: myPromotedHelmBuildInfo
-            - name: MyHelmChart
+            - name: MyPromotedHelmChart
       - name: deploy_helm
         type: HelmDeploy
         configuration:
@@ -269,7 +276,7 @@ pipelines:
           inputSteps:
             - name: promote_helm_chart
           inputResources:
-            - name: MyHelmChart
+            - name: MyPromotedHelmChart
           flags: '--namespace default'
           valueFilePaths:
             - values.yaml
