@@ -274,7 +274,7 @@ pipelines:
           onStart:
             - helm init --service-account tiller --tiller-namespace default
             - helm version
-            - helm del --purge docker-app-chart
+            #- helm del --purge docker-app-chart
             - helm list
             - kubectl version
           onSuccess:
