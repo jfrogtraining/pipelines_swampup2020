@@ -265,6 +265,8 @@ pipelines:
           chartPath:   .
           integrations:
             - name: K8S_SA
+          inputSteps:
+            - name: promote_helm_chart
           inputResources:
             - name: MyHelmChart
           flags: '--namespace default'
