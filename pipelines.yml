@@ -15,7 +15,7 @@ resources:
       sourceRepository: docker
       imageName: docker.artifactory-unified.soleng-us.jfrog.team/swampup_docker_app_demo
       imageTag: '${run_number}'
-      #autoPull:            <boolean> #(default false)
+      autoPull: true
   - name: myBuildInfo
     type: BuildInfo
     configuration:
