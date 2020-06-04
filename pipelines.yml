@@ -217,6 +217,19 @@ pipelines:
 
   - name: swampup_docker_app_helm_deploy
     steps:
+#       - name: export_var
+#         type: Bash
+#         configuration:
+#           integrations:
+#             - name: ArtifactoryUnified
+#           inputResources:
+#             - name: myPromotedBuildInfo
+#           outputResources:
+#             - name: app_helm_chart
+#         execution:
+#           onSuccess: 
+#           - add_pipeline_variables triggerBuildInfoName="${res_myPromotedBuildInfo_buildName}"
+#           - add_pipeline_variables triggerBuildInfoNumber="${res_myPromotedBuildInfo_buildNumber}"
       - name: helm_build
         type: HelmPublish
         configuration:
@@ -283,7 +296,8 @@ pipelines:
       - name: test_docker_app
         type: Bash
         configuration:
-          #inputResources:
+          inputResources:
+            - name: myPromotedBuildInfo
           #  - name: DockerAppImage
           inputSteps:
             - name: deploy_helm
@@ -306,6 +320,7 @@ pipelines:
             - if curl -Is "http://35.230.111.194:8088/index.html"; then echo "Our Docker app IS Running"; else echo "Our Docker app is NOT Running"; fi
           onSuccess:
             - echo "Job well done!"
+            #- echo "items.find({\"name\":\"manifest.json\",\"@build.name\":\"${triggerBuildInfoName}\",\"@build.number\":\"${triggerBuildInfoNumber}\"}).include(\"@docker.tag\")" > aql.json
             - curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X PUT $int_ArtifactoryUnified_url/api/storage/docker-prod-local/swampup_docker_app_demo/$latest_docker_ver/manifest.json?properties=qa.functional-test=$dockerAppStatus
           onFailure:
             - echo "uh oh, something went wrong"
