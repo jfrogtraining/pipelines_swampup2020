@@ -175,6 +175,29 @@ pipelines:
             - name: bld_docker_app
           outputResources:
             - name: myBuildInfo
+      - name: test_docker_app
+        type: Bash
+        configuration:
+          environmentVariables:
+            step_env_var2: "hello"
+          #inputResources:
+          #  - name: myGitRepo
+          #    trigger: false
+          inputSteps:
+            - name: push_docker_app
+          integrations:
+            - name: ArtifactoryUnified
+        execution:
+          onStart:
+            - docker pull docker.artifactory-unified.soleng-us.jfrog.team/swampup_docker_app_demo:'${run_number}'
+            - docker run -p 8088:8088 docker.artifactory-unified.soleng-us.jfrog.team/swampup_docker_app_demo:'${run_number}'
+            - sleep 20
+            - add_run_variables stdout='curl -Is "http://35.230.111.194:8088/index.html"'
+            - echo $stdout
+            #- stdout2 = sh(script: 'curl -Is "http://localhost:8001/frogsui/app/index.html"', returnStdout: true)
+            #- if [ -z $app_version ]; then echo "Success"; else add_pipeline_variables app_version=$(bump_semver $app_version minor); fi
+          onComplete:
+            - echo "Running"
       - name: promote_docker_app
         type: PromoteBuild
         configuration:
