@@ -213,6 +213,7 @@ pipelines:
           onFailure:
             - echo "uh oh, something went wrong"
           onComplete: #always
+            - docker ps -a -q
             - docker stop $(docker ps -a -q)
             - echo "docker image was stopped"
       - name: promote_docker_app
