@@ -198,7 +198,7 @@ pipelines:
             - name: ArtifactoryUnified
         execution:
           onStart:
-            - docker run -d -p 8088:8088 --restart=always --name docker-app-test $res_DockerAppImage_imageName:$res_DockerAppImage_imageTag
+            - docker run -d -p 8088:8088 $res_DockerAppImage_imageName:$res_DockerAppImage_imageTag
             - sleep 20
             - add_run_variables stdout='curl -Is "http://localhost:8088/index.html"'
             - echo $stdout
