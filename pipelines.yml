@@ -303,7 +303,7 @@ pipelines:
             #- 'curl -Is "http://localhost:8088/index.html" 2>/dev/null' > test.txt
             #- cat test.txt
             #- if 'curl -Is "http://localhost:8088/index.html"'; then add_run_variables dockerAppStatus="pass"; else add_run_variables dockerAppStatus="fail"; fi
-            - if 'curl -Is "http://35.230.111.194/:8088/index.html"'; then echo "Our Docker app IS Running"; else echo "Our Docker app is NOT Running"; fi
+            - if curl -Is "http://35.230.111.194/:8088/index.html"; then echo "Our Docker app IS Running"; else echo "Our Docker app is NOT Running"; fi
           onSuccess:
             - echo "Job well done!"
             #- curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X PUT $int_ArtifactoryUnified_url/api/storage/docker-dev-local/swampup_docker_app_demo/$latest_docker_ver/manifest.json?properties=qa.functional-test=$dockerAppStatus
