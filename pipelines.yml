@@ -185,40 +185,6 @@ pipelines:
             - name: bld_docker_app
           outputResources:
             - name: myBuildInfo
-      - name: test_docker_app
-        type: Bash
-        configuration:
-          inputResources:
-            - name: DockerAppImage
-          inputSteps:
-            - name: push_docker_app
-          integrations:
-            - name: ArtifactoryUnified
-        execution:
-          onStart:
-            - echo $res_DockerAppImage_imageName
-            - echo $res_DockerAppImage_imageTag
-            - echo $latest_docker_ver
-          onExecute:
-            - docker run -d -p 8088:8088 --name docker-app-test $res_DockerAppImage_imageName:$latest_docker_ver
-            - sleep 20
-            #- PAGE=$(curl -s "http://localhost:8088/index.html" | tr '[:upper:]' '[:lower:]')
-            #- if [[ $PAGE =~ "swampup" ]]; then echo "swampup found" fi
-            - add_run_variables docker_promotion_repo=docker-prod-local
-            - 'curl -Is "http://localhost:8088/index.html" 2>/dev/null' > test.txt
-            - cat test.txt
-            #- if 'curl -Is "http://localhost:8088/index.html"'; then add_run_variables dockerAppStatus="pass"; else add_run_variables dockerAppStatus="fail"; fi
-            #- if 'curl -Is "http://localhost:8088/index.html"'; then echo "Our Docker app IS Running"; else echo "Our Docker app is NOT Running"; fi
-          onSuccess:
-            - echo "Job well done!"
-            - curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X PUT $int_ArtifactoryUnified_url/api/storage/docker-dev-local/swampup_docker_app_demo/$latest_docker_ver/manifest.json?properties=qa.functional-test=$dockerAppStatus
-          onFailure:
-            - echo "uh oh, something went wrong"
-          onComplete: #always
-            - docker stop docker-app-test
-            - docker rm docker-app-test
-            - echo "docker image status is $dockerAppStatus"
-            - echo "test"
       - name: promote_docker_app
         type: PromoteBuild
         configuration:
@@ -228,7 +194,7 @@ pipelines:
             - name: SlackSolEng
             - name: Github_SolEng
           inputSteps:
-            - name: test_docker_app
+            - name: push_docker_app
           inputResources:
             - name: myBuildInfo
           outputResources:
@@ -314,7 +280,40 @@ pipelines:
             - echo "uh oh, something went wrong"
           onComplete: #always
             - echo "Cleaning up some stuff"
-            
+      - name: test_docker_app
+        type: Bash
+        configuration:
+          #inputResources:
+          #  - name: DockerAppImage
+          inputSteps:
+            - name: deploy_helm
+          integrations:
+            - name: ArtifactoryUnified
+        execution:
+          onStart:
+            #- echo $res_DockerAppImage_imageName
+            #- echo $res_DockerAppImage_imageTag
+            #- echo $latest_docker_ver
+          onExecute:
+            #- docker run -d -p 8088:8088 --name docker-app-test $res_DockerAppImage_imageName:$latest_docker_ver
+            #- sleep 20
+            #- PAGE=$(curl -s "http://localhost:8088/index.html" | tr '[:upper:]' '[:lower:]')
+            #- if [[ $PAGE =~ "swampup" ]]; then echo "swampup found" fi
+            #- add_run_variables docker_promotion_repo=docker-prod-local
+            #- 'curl -Is "http://localhost:8088/index.html" 2>/dev/null' > test.txt
+            #- cat test.txt
+            #- if 'curl -Is "http://localhost:8088/index.html"'; then add_run_variables dockerAppStatus="pass"; else add_run_variables dockerAppStatus="fail"; fi
+            - if 'curl -Is "http://35.230.111.194/:8088/index.html"'; then echo "Our Docker app IS Running"; else echo "Our Docker app is NOT Running"; fi
+          onSuccess:
+            - echo "Job well done!"
+            #- curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X PUT $int_ArtifactoryUnified_url/api/storage/docker-dev-local/swampup_docker_app_demo/$latest_docker_ver/manifest.json?properties=qa.functional-test=$dockerAppStatus
+          onFailure:
+            - echo "uh oh, something went wrong"
+          onComplete: #always
+            #- docker stop docker-app-test
+            #- docker rm docker-app-test
+            #- echo "docker image status is $dockerAppStatus"
+            - echo "test"            
   - name: swampup_release_mgmt
     steps:
       - name: release_bundle
