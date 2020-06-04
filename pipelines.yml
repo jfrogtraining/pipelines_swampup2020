@@ -11,7 +11,7 @@ resources:
   - name: DockerAppImage
     type: Image
     configuration:
-      registry: ArtifactoryDockerRegistry
+      registry: ArtifactoryUnified #ArtifactoryDockerRegistry
       sourceRepository: docker
       imageName: docker.artifactory-unified.soleng-us.jfrog.team/swampup_docker_app_demo
       imageTag: '${run_number}'
