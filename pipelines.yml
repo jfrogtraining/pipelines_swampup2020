@@ -205,8 +205,8 @@ pipelines:
             #- PAGE=$(curl -s "http://localhost:8088/index.html" | tr '[:upper:]' '[:lower:]')
             #- if [[ $PAGE =~ "swampup" ]]; then echo "swampup found" fi
             - add_run_variables docker_promotion_repo=docker-prod-local
-            - var='curl -Is "http://localhost:8088/index.html" 2>/dev/null'
-            - echo $var
+            - 'curl -Is "http://localhost:8088/index.html" 2>/dev/null' > test.txt
+            - cat test.txt
             #- if 'curl -Is "http://localhost:8088/index.html"'; then add_run_variables dockerAppStatus="pass"; else add_run_variables dockerAppStatus="fail"; fi
             #- if 'curl -Is "http://localhost:8088/index.html"'; then echo "Our Docker app IS Running"; else echo "Our Docker app is NOT Running"; fi
           onSuccess:
