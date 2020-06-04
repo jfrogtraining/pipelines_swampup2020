@@ -14,7 +14,7 @@ resources:
       registry: ArtifactoryUnified #ArtifactoryDockerRegistry
       sourceRepository: docker
       imageName: docker.artifactory-unified.soleng-us.jfrog.team/swampup_docker_app_demo
-      imageTag: '${run_number}'
+      imageTag: ${run_number}
       autoPull: true
   - name: myBuildInfo
     type: BuildInfo
@@ -203,10 +203,10 @@ pipelines:
             #- docker run -d -p 8088:8088 $res_DockerAppImage_imageName:$res_DockerAppImage_imageTag
             - docker run -d -p 8088:8088 docker.artifactory-unified.soleng-us.jfrog.team/swampup_docker_app_demo:7
             - sleep 20
-            - add_run_variables stdout=$(curl -Is 'http://localhost:8088/index.html')
-            - echo $stdout
+            #- add_run_variables stdout=$(curl -Is 'http://localhost:8088/index.html')
+            #- echo $stdout
             #- stdout2 = sh(script: 'curl -Is "http://localhost:8001/frogsui/app/index.html"', returnStdout: true)
-            #- if [ -z $app_version ]; then echo "Success"; else add_pipeline_variables app_version=$(bump_semver $app_version minor); fi
+            - if [ curl -Is "http://35.230.111.194:8088/index.html" | grep "200" > /dev/null ]; then echo "Our Docker app IS Running"; else echo "Our Docker app is NOT Running"; fi
           onComplete:
             - docker stop $(docker ps -a -q)
             - docker rm $(docker ps -a -q)
