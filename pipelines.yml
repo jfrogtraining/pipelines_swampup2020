@@ -188,39 +188,39 @@ pipelines:
           outputResources:
             - name: myBuildInfo
             - name: DockerAppImage
-      - name: test_docker_app
-        type: Bash
-        configuration:
-          inputResources:
-            - name: DockerAppImage
-          inputSteps:
-            - name: push_docker_app
-          integrations:
-            - name: ArtifactoryUnified
-        execution:
-          onStart:
-            - echo $res_DockerAppImage_imageName
-            - echo $res_DockerAppImage_imageTag
-            - echo $latest_docker_ver
-          onExecute:
-            - docker run -d -p 8088:8088 --name docker-app-test $res_DockerAppImage_imageName:$latest_docker_ver
-            - sleep 30
-            #- PAGE=$(curl -s "http://localhost:8088/index.html" | tr '[:upper:]' '[:lower:]')
-            #- if [[ $PAGE =~ "swampup" ]]; then echo "swampup found" fi
-            #- if curl -Is "http://localhost:8088/index.html" | grep "200" > /dev/null; then add_run_variables dockerAppStatus="success"; else add_run_variables dockerAppStatus="failure"; fi
-            - if curl -Is "http://localhost:8088/index.html"; then echo "Our Docker app IS Running"; else echo "Our Docker app is NOT Running"; fi
-            - docker stop docker-app-test
-            #- docker stop $(docker ps -a -q)
-            #- docker rm $(docker ps -a -q)
-          onSuccess:
-            - echo "Job well done!"
-          onFailure:
-            - echo "uh oh, something went wrong"
-          onComplete: #always
-            #- docker stop $(docker ps -a -q)
-            #- docker rm $(docker ps -a -q)
-            #- echo "docker image status is $dockerAppStatus"
-            - echo "test"
+#       - name: test_docker_app
+#         type: Bash
+#         configuration:
+#           inputResources:
+#             - name: DockerAppImage
+#           inputSteps:
+#             - name: push_docker_app
+#           integrations:
+#             - name: ArtifactoryUnified
+#         execution:
+#           onStart:
+#             - echo $res_DockerAppImage_imageName
+#             - echo $res_DockerAppImage_imageTag
+#             - echo $latest_docker_ver
+#           onExecute:
+#             - docker run -d -p 8088:8088 --name docker-app-test $res_DockerAppImage_imageName:$latest_docker_ver
+#             - sleep 30
+#             #- PAGE=$(curl -s "http://localhost:8088/index.html" | tr '[:upper:]' '[:lower:]')
+#             #- if [[ $PAGE =~ "swampup" ]]; then echo "swampup found" fi
+#             #- if curl -Is "http://localhost:8088/index.html" | grep "200" > /dev/null; then add_run_variables dockerAppStatus="success"; else add_run_variables dockerAppStatus="failure"; fi
+#             - if curl -Is "http://localhost:8088/index.html"; then echo "Our Docker app IS Running"; else echo "Our Docker app is NOT Running"; fi
+#             - docker stop docker-app-test
+#             #- docker stop $(docker ps -a -q)
+#             #- docker rm $(docker ps -a -q)
+#           onSuccess:
+#             - echo "Job well done!"
+#           onFailure:
+#             - echo "uh oh, something went wrong"
+#           onComplete: #always
+#             #- docker stop $(docker ps -a -q)
+#             #- docker rm $(docker ps -a -q)
+#             #- echo "docker image status is $dockerAppStatus"
+#             - echo "test"
       - name: promote_docker_app
         type: PromoteBuild
         configuration:
