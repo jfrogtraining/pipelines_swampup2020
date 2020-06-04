@@ -8,6 +8,14 @@ resources:
         include: master
       buildOn:
         commit: false
+  - name: DockerAppImage
+     type: Image
+     configuration:
+       registry: ArtifactoryDockerRegistry
+       sourceRepository: docker
+       imageName: docker.artifactory-unified.soleng-us.jfrog.team/swampup_docker_app_demo
+       imageTag: '${run_number}'
+       #autoPull:            <boolean> #(default false)
   - name: myBuildInfo
     type: BuildInfo
     configuration:
@@ -149,6 +157,8 @@ pipelines:
             - name: ArtifactoryUnified
           inputResources:
             - name: myGitRepo
+          outputResources:
+            - name: DockerAppImage
           inputSteps:
             - name: bld_backend
             - name: bld_frontend
@@ -180,19 +190,17 @@ pipelines:
         configuration:
           environmentVariables:
             step_env_var2: "hello"
-          #inputResources:
-          #  - name: myGitRepo
-          #    trigger: false
+          inputResources:
+            - name: DockerAppImage
           inputSteps:
             - name: push_docker_app
           integrations:
             - name: ArtifactoryUnified
         execution:
           onStart:
-            - docker pull docker.artifactory-unified.soleng-us.jfrog.team/swampup_docker_app_demo:'${run_number}'
-            - docker run -p 8088:8088 docker.artifactory-unified.soleng-us.jfrog.team/swampup_docker_app_demo:'${run_number}'
+            - docker run -p 8088:8088 $res_DockerAppImage_imageName:$res_DockerAppImage_imageTag
             - sleep 20
-            - add_run_variables stdout='curl -Is "http://35.230.111.194:8088/index.html"'
+            - add_run_variables stdout='curl -Is "http://localhost:8088/index.html"'
             - echo $stdout
             #- stdout2 = sh(script: 'curl -Is "http://localhost:8001/frogsui/app/index.html"', returnStdout: true)
             #- if [ -z $app_version ]; then echo "Success"; else add_pipeline_variables app_version=$(bump_semver $app_version minor); fi
