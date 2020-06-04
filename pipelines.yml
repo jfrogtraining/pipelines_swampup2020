@@ -296,9 +296,6 @@ pipelines:
       - name: test_docker_app
         type: Bash
         configuration:
-          inputResources:
-            - name: myPromotedBuildInfo
-          #  - name: DockerAppImage
           inputSteps:
             - name: deploy_helm
           integrations:
