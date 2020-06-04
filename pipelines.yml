@@ -198,9 +198,10 @@ pipelines:
             - name: ArtifactoryUnified
         execution:
           onStart:
-            - echo "this is my image $res_DockerAppImage_imageName:$res_DockerAppImage_imageTag"
-            - docker run -d -p 8088:8088 $res_DockerAppImage_imageName:$res_DockerAppImage_imageTag
-            #- docker run -d -p 8088:8088 docker.artifactory-unified.soleng-us.jfrog.team/swampup_docker_app_demo:7
+            - echo $res_DockerAppImage_imageName
+            - echo $res_DockerAppImage_imageTag
+            #- docker run -d -p 8088:8088 $res_DockerAppImage_imageName:$res_DockerAppImage_imageTag
+            - docker run -d -p 8088:8088 docker.artifactory-unified.soleng-us.jfrog.team/swampup_docker_app_demo:7
             - sleep 20
             - add_run_variables stdout=$(curl -Is 'http://localhost:8088/index.html')
             - echo $stdout
