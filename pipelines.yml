@@ -201,18 +201,20 @@ pipelines:
             - echo $res_DockerAppImage_imageName
             - echo $res_DockerAppImage_imageTag
             - echo $latest_docker_ver
-            - add_run_variables $docker_run=0
-            - $docker_run='docker run -d -p 8088:8088 $res_DockerAppImage_imageName:$latest_docker_ver'
+          onExecute:
+            - docker run -d -p 8088:8088 $res_DockerAppImage_imageName:$latest_docker_ver
             - sleep 20
             #- add_run_variables stdout=$(curl -Is 'http://localhost:8088/index.html')
             #- echo $stdout
             #- stdout2 = sh(script: 'curl -Is "http://localhost:8001/frogsui/app/index.html"', returnStdout: true)
             - if curl -Is "http://localhost:8088/index.html" | grep "200" > /dev/null; then echo "Our Docker app IS Running"; else echo "Our Docker app is NOT Running"; fi
-          onComplete:
-            - docker stop $docker_run
-            #- docker stop $(docker ps -a -q)
-            #- docker rm $(docker ps -a -q)
-            - echo "Running"
+          onSuccess:
+            - echo "Job well done!"
+          onFailure:
+            - echo "uh oh, something went wrong"
+          onComplete: #always
+            - docker stop $(docker ps -a -q)
+            - echo "docker image was stopped"
       - name: promote_docker_app
         type: PromoteBuild
         configuration:
