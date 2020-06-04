@@ -201,7 +201,7 @@ pipelines:
             - echo $latest_docker_ver
           onExecute:
             - docker run -d -p 8088:8088 --name docker-app-test $res_DockerAppImage_imageName:$latest_docker_ver
-            - sleep 40
+            - sleep 50
             #- PAGE=$(curl -s "http://localhost:8088/index.html" | tr '[:upper:]' '[:lower:]')
             #- if [[ $PAGE =~ "swampup" ]]; then echo "swampup found" fi
             - if curl -Is "http://localhost:8088/index.html"; then add_run_variables dockerAppStatus="pass"; else add_run_variables dockerAppStatus="fail"; fi
