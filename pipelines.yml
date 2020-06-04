@@ -319,7 +319,7 @@ pipelines:
           onSuccess:
             - echo "Job well done!"
             #- echo "items.find({\"name\":\"manifest.json\",\"@build.name\":\"${res_myPromotedBuildInfo_buildName}\",\"@build.number\":\"${res_myPromotedBuildInfo_buildNumber}\"}).include(\"@docker.tag\")" > aql.json
-            - curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X PUT $int_ArtifactoryUnified_url/api/storage/docker-prod-local/swampup_docker_app_demo/${res_myPromotedBuildInfo_buildNumber}/manifest.json?properties=qa.functional-test=$dockerAppStatus
+            - curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X PUT $int_ArtifactoryUnified_url/api/storage/docker-prod-local/swampup_docker_app_demo/${res_myBuildInfo_buildNumber}/manifest.json?properties=qa.functional-test=$dockerAppStatus
           onFailure:
             - echo "uh oh, something went wrong"
           onComplete: #always
