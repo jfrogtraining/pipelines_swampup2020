@@ -293,7 +293,7 @@ pipelines:
           onStart:
             #- echo $res_DockerAppImage_imageName
             #- echo $res_DockerAppImage_imageTag
-            #- echo $latest_docker_ver
+            - echo "test" #$latest_docker_ver
           onExecute:
             #- docker run -d -p 8088:8088 --name docker-app-test $res_DockerAppImage_imageName:$latest_docker_ver
             #- sleep 20
