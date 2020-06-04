@@ -201,10 +201,11 @@ pipelines:
             - echo $latest_docker_ver
           onExecute:
             - docker run -d -p 8088:8088 --name docker-app-test $res_DockerAppImage_imageName:$latest_docker_ver
-            - sleep 120
+            - sleep 20
             #- PAGE=$(curl -s "http://localhost:8088/index.html" | tr '[:upper:]' '[:lower:]')
             #- if [[ $PAGE =~ "swampup" ]]; then echo "swampup found" fi
             - add_run_variables docker_promotion_repo=docker-prod-local
+            - curl -Is "http://localhost:8088/index.html"
             - if curl -Is "http://localhost:8088/index.html"; then add_run_variables dockerAppStatus="pass"; else add_run_variables dockerAppStatus="fail"; fi
             - if curl -Is "http://localhost:8088/index.html"; then echo "Our Docker app IS Running"; else echo "Our Docker app is NOT Running"; fi
             - docker stop docker-app-test
