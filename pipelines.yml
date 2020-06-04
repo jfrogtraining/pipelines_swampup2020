@@ -207,14 +207,16 @@ pipelines:
             #- add_run_variables stdout=$(curl -Is 'http://localhost:8088/index.html')
             #- echo $stdout
             #- stdout2 = sh(script: 'curl -Is "http://localhost:8001/frogsui/app/index.html"', returnStdout: true)
+            - PAGE=$(curl -s "http://35.230.111.194:8088/index.html" | tr '[:upper:]' '[:lower:]')
+            - if [[ $PAGE =~ "swampup" ]]; then echo "swampup found" fi
             - if curl -Is "http://localhost:8088/index.html" | grep "200" > /dev/null; then echo "Our Docker app IS Running"; else echo "Our Docker app is NOT Running"; fi
           onSuccess:
             - echo "Job well done!"
           onFailure:
             - echo "uh oh, something went wrong"
           onComplete: #always
-            - docker ps -a -q
-            - docker stop $(docker ps -a -q)
+            #- docker ps -a -q
+            #- docker stop $(docker ps -a -q)
             - echo "docker image was stopped"
       - name: promote_docker_app
         type: PromoteBuild
