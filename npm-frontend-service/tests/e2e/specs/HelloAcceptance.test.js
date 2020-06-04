@@ -7,7 +7,7 @@ module.exports = {
             .url(process.env.VUE_DEV_SERVER_URL)
             .waitForElementVisible('#app', 5000)
             .assert.elementPresent('.hello')
-            .assert.containsText('h1', 'Welcome to your SwampUp 2019 App')
+            .assert.containsText('h1', 'Welcome to your Virtual SwampUp 2020 App')
             .assert.elementCount('img', 1)
             .end()
     }
