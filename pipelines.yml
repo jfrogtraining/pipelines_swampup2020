@@ -341,7 +341,7 @@ pipelines:
             - name: myPromotedBuildInfo
         execution:
           onStart:
-            - echo "promotion repo is: $docker_promotion_repo"
+            - echo "Promotion repo is $docker_promotion_repo"
             - curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X PUT $int_ArtifactoryUnified_url/api/storage/docker-dev-local/swampup_docker_app_demo/${res_myBuildInfo_buildNumber}/manifest.json?properties=qa.functional-test=$dockerAppStatus
             - curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X DELETE $int_ArtifactoryUnified_url/docker-prod-local/swampup_docker_app_demo/latest
             #- 'curl -H "Authorization: token ${int_Github_SolEng_token}" ${int_Github_SolEng_url}/rate_limit'
