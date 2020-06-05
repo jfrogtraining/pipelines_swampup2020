@@ -236,8 +236,9 @@ pipelines:
             - sed -i "s/docker-app/swampup_docker_app_demo/" values.yaml
             - sed -i "s/0.1.1/0.1.$run_number/g" Chart.yaml
             - cat values.yaml
-            - cat "build number is $res_myBuildInfo_buildNumber"
-            - sed -i "s/latest/${res_myBuildInfo_buildNumber}/" values.yaml
+            - sed -i "s/latest/1.1.1/" values.yaml
+            - cat values.yaml
+            #- sed -i "s/latest/${res_myBuildInfo_buildNumber}/" values.yaml
           onSuccess:
             - echo "Job well done!"
           onFailure:
