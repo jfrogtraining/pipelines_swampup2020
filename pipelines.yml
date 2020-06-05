@@ -341,8 +341,8 @@ pipelines:
             - name: Github_SolEng
           inputSteps:
             - name: test_docker_app
-          #inputResources:
-          #  - name: myBuildInfo
+          inputResources:
+            - name: myBuildInfo
           outputResources:
             - name: myPromotedBuildInfo
         execution:
