@@ -232,11 +232,15 @@ pipelines:
           onStart:
             - echo "Preparing for work..."
             - pushd $res_myGitRepo_resourcePath/docker-app-chart
+            - add_pipeline_variables triggerBuildInfoName="${res_myBuildInfo_buildName}"
+            - add_pipeline_variables triggerBuildInfoNumber="${res_myBuildInfo_buildNumber}"
             - sed -i "s/docker.artifactory/docker.artifactory-unified.soleng-us.jfrog.team/" values.yaml
             - sed -i "s/docker-app/swampup_docker_app_demo/" values.yaml
             - sed -i "s/0.1.1/0.1.$run_number/g" Chart.yaml
             - cat values.yaml
             - sed -i "s/latest/1.1.1/" values.yaml
+            - cat values.yaml
+            - sed -i "s/1.1.1/$triggerBuildInfoNumber/" values.yaml
             - cat values.yaml
             #- sed -i "s/latest/${res_myBuildInfo_buildNumber}/" values.yaml
           onSuccess:
@@ -245,8 +249,6 @@ pipelines:
             - echo "uh oh, something went wrong"
           onComplete: #always
             - echo "Cleaning up some stuff"
-            - add_pipeline_variables triggerBuildInfoName="${res_myBuildInfo_buildName}"
-            - add_pipeline_variables triggerBuildInfoNumber="${res_myBuildInfo_buildNumber}"
       - name: promote_helm_chart
         type: PromoteBuild
         configuration:
