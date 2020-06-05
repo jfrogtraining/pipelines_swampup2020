@@ -294,9 +294,10 @@ pipelines:
           onComplete: #always
             - echo "Cleaning up some stuff"
             - kubectl get pods --no-headers=true | awk '/docker-app-chart-docker-app-chart/{print $1}'
-            #- add_run_variables pod_name=kubectl get pods --no-headers=true | awk '/docker-app-chart-docker-app-chart/{print $1}'
-            - add_run_variables pod_name=="$(kubectl get pods --no-headers=true | awk '/docker-app-chart-docker-app-chart/{print $1}')"
+            - add_run_variables pod_name="$(kubectl get pods --no-headers=true | awk '/docker-app-chart-docker-app-chart/{print $1}')"
+            - add_run_variables pod_ip="$(kubectl describe pod $pod_name | grep "IP:" | awk '{print $2}')"
             - echo "pod name is $pod_name"
+            - echo "pod ip is $pod_ip"
       - name: test_docker_app
         type: Bash
         configuration:
