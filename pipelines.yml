@@ -217,22 +217,10 @@ pipelines:
 
   - name: swampup_docker_app_helm_deploy
     steps:
-#       - name: export_var
-#         type: Bash
-#         configuration:
-#           integrations:
-#             - name: ArtifactoryUnified
-#           inputResources:
-#             - name: myPromotedBuildInfo
-#           outputResources:
-#             - name: app_helm_chart
-#         execution:
-#           onSuccess: 
-#           - add_pipeline_variables triggerBuildInfoName="${res_myPromotedBuildInfo_buildName}"
-#           - add_pipeline_variables triggerBuildInfoNumber="${res_myPromotedBuildInfo_buildNumber}"
       - name: helm_build
         type: HelmPublish
         configuration:
+          chartPath: docker-app-chart/
           autoPublishBuildInfo: true                    # default false         
           inputResources:
             - name: myGitRepo
