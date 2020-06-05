@@ -293,6 +293,9 @@ pipelines:
             - echo "uh oh, something went wrong"
           onComplete: #always
             - echo "Cleaning up some stuff"
+            - kubectl get pods --no-headers=true | awk '/docker-app-chart-docker-app-chart/{print $1}'
+            - add_run_variables pod_name=kubectl get pods --no-headers=true | awk '/docker-app-chart-docker-app-chart/{print $1}'
+            - echo "pod name is $pod_name"
       - name: test_docker_app
         type: Bash
         configuration:
