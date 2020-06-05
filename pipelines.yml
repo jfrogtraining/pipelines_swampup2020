@@ -238,6 +238,7 @@ pipelines:
           autoPublishBuildInfo: true                    # default false         
           inputResources:
             - name: myGitRepo
+            - name: myBuildInfo
           outputResources:
             - name: MyHelmChart
             - name: myHelmBuildInfo
@@ -248,13 +249,15 @@ pipelines:
             - sed -i "s/docker.artifactory/docker.artifactory-unified.soleng-us.jfrog.team/" values.yaml
             - sed -i "s/docker-app/simple_pipeline_app_demo/" values.yaml
             - sed -i "s/0.1.1/0.1.$run_number/g" Chart.yaml
-            #- sed -i "s/111/$latest_docker_ver/g" values.yaml
+            - sed -i "s/111/${res_myBuildInfo_buildNumber}/g" values.yaml
           onSuccess:
             - echo "Job well done!"
           onFailure:
             - echo "uh oh, something went wrong"
           onComplete: #always
             - echo "Cleaning up some stuff"
+            - add_pipeline_variables triggerBuildInfoName="${res_myBuildInfo_buildName}"
+            - add_pipeline_variables triggerBuildInfoNumber="${res_myBuildInfo_buildNumber}"
       - name: promote_helm_chart
         type: PromoteBuild
         configuration:
@@ -338,22 +341,22 @@ pipelines:
             - name: Github_SolEng
           inputSteps:
             - name: test_docker_app
-          inputResources:
-            - name: myBuildInfo
+          #inputResources:
+          #  - name: myBuildInfo
           outputResources:
             - name: myPromotedBuildInfo
         execution:
           onStart:
             - echo "Promotion repo is $docker_promotion_repo"
-            - curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X PUT $int_ArtifactoryUnified_url/api/storage/docker-dev-local/swampup_docker_app_demo/${res_myBuildInfo_buildNumber}/manifest.json?properties=qa.functional-test=$dockerAppStatus
+            - curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X PUT $int_ArtifactoryUnified_url/api/storage/docker-dev-local/swampup_docker_app_demo/$triggerBuildInfoNumber/manifest.json?properties=qa.functional-test=$dockerAppStatus
             - curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X DELETE $int_ArtifactoryUnified_url/docker-prod-local/swampup_docker_app_demo/latest
             #- 'curl -H "Authorization: token ${int_Github_SolEng_token}" ${int_Github_SolEng_url}/rate_limit'
             - add_pipeline_variables prev_runid=$run_id
             - echo $app_version
             #- echo $latest_docker_ver
           onSuccess:
-            - if [ "$dockerAppStatus" == "pass" ]; then curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey $int_ArtifactoryUnified_url/api/docker/docker-prod-local/v2/promote -X POST -H 'Content-Type:application/json' -d '{"targetRepo":"docker-prod-local", "dockerRepository":"swampup_docker_app_demo", "tag":"'"${res_myBuildInfo_buildNumber}"'", "targetTag":"latest", "copy":true}'; fi
-            - if [ "$dockerAppStatus" == "pass" ]; then curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X PUT $int_ArtifactoryUnified_url/api/storage/docker-prod-local/swampup_docker_app_demo/latest/manifest.json?properties=docker.refersTo=${res_myBuildInfo_buildNumber}; fi
+            - if [ "$dockerAppStatus" == "pass" ]; then curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey $int_ArtifactoryUnified_url/api/docker/docker-prod-local/v2/promote -X POST -H 'Content-Type:application/json' -d '{"targetRepo":"docker-prod-local", "dockerRepository":"swampup_docker_app_demo", "tag":"'"$triggerBuildInfoNumber}"'", "targetTag":"latest", "copy":true}'; fi
+            - if [ "$dockerAppStatus" == "pass" ]; then curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X PUT $int_ArtifactoryUnified_url/api/storage/docker-prod-local/swampup_docker_app_demo/latest/manifest.json?properties=docker.refersTo=$triggerBuildInfoNumber; fi
             #- >-
             #  curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey $int_ArtifactoryUnified_url/api/docker/docker-prod-local/v2/promote
             #  -X POST -H 'Content-Type:application/json' -d
