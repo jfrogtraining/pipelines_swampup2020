@@ -319,7 +319,7 @@ pipelines:
           onSuccess:
             - echo "Job well done!"
             #- echo "items.find({\"name\":\"manifest.json\",\"@build.name\":\"${res_myPromotedBuildInfo_buildName}\",\"@build.number\":\"${res_myPromotedBuildInfo_buildNumber}\"}).include(\"@docker.tag\")" > aql.json
-            - curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X PUT $int_ArtifactoryUnified_url/api/storage/docker-dev-local/swampup_docker_app_demo/${res_myBuildInfo_buildNumber}/manifest.json?properties=qa.functional-test=$dockerAppStatus
+            #- curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X PUT $int_ArtifactoryUnified_url/api/storage/docker-dev-local/swampup_docker_app_demo/${res_myBuildInfo_buildNumber}/manifest.json?properties=qa.functional-test=$dockerAppStatus
           onFailure:
             - echo "uh oh, something went wrong"
           onComplete: #always
@@ -341,8 +341,9 @@ pipelines:
             - name: myPromotedBuildInfo
         execution:
           onStart:
-            - echo $docker_promotion_repo
-            #- curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X DELETE $int_ArtifactoryUnified_url/docker-prod-local/swampup_docker_app_demo/latest
+            - echo "promotion repo is: $docker_promotion_repo"
+            - curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X PUT $int_ArtifactoryUnified_url/api/storage/docker-dev-local/swampup_docker_app_demo/${res_myBuildInfo_buildNumber}/manifest.json?properties=qa.functional-test=$dockerAppStatus
+            - curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X DELETE $int_ArtifactoryUnified_url/docker-prod-local/swampup_docker_app_demo/latest
             #- 'curl -H "Authorization: token ${int_Github_SolEng_token}" ${int_Github_SolEng_url}/rate_limit'
             - add_pipeline_variables prev_runid=$run_id
             - echo $app_version
