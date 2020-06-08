@@ -280,13 +280,12 @@ pipelines:
             #- helm del --purge docker-app-chart
             - helm list
             - kubectl version
+            - kubectl delete deployment docker-app-chart-docker-app-chart
           onSuccess:
-            - echo "Job well done!"
             - kubectl get pods --namespace default
           onFailure:
             - echo "uh oh, something went wrong"
           onComplete: #always
-            - echo "Cleaning up some stuff"
             - kubectl get pods --no-headers=true | awk '/docker-app-chart-docker-app-chart/{print $1}'
             - add_run_variables pod_name="$(kubectl get pods --no-headers=true | awk '/docker-app-chart-docker-app-chart/{print $1}')"
             - add_run_variables pod_ip="$(kubectl describe pod $pod_name | grep "IP:" | awk '{print $2}')"
