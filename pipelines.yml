@@ -280,7 +280,11 @@ pipelines:
             #- helm del --purge docker-app-chart
             - helm list
             - kubectl version
-            - kubectl delete deployment docker-app-chart-docker-app-chart
+            - add_run_variables deployment_name="$(kubectl get deployments | awk '/docker-app-chart-docker-app-chart/{print $1}')"
+            - echo "deployment name is $deployment_name"
+            #- kubectl delete deployment docker-app-chart-docker-app-chart
+            - if [ "$deployment_name" == "docker-app-chart-docker-app-chart" ]; then kubectl delete deployment docker-app-chart-docker-app-chart; fi
+
           onSuccess:
             - kubectl get pods --namespace default
           onFailure:
