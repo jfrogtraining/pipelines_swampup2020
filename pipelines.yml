@@ -159,7 +159,6 @@ pipelines:
             - name: bld_frontend
         execution:
           onStart:
-            - add_pipeline_variables latest_docker_ver='$run_number'
             - sed -i "s/frontend-3.0.0/frontend-$previous_frontend_ver/g" $res_myGitRepo_resourcePath/Dockerfile
             - sed -i "s/1.0.0/$previous_backend_ver/g" $res_myGitRepo_resourcePath/Dockerfile
           onComplete:
