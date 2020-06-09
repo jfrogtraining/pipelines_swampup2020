@@ -162,7 +162,7 @@ pipelines:
           onStart:
             - if [ -z $app_version ]; then add_pipeline_variables app_version=1.0.0; else add_pipeline_variables app_version=$(bump_semver $app_version minor); fi
             - echo $app_version
-            - add_pipeline_variables 3='$run_number'
+            - add_pipeline_variables latest_docker_ver='$run_number'
             - sed -i "s/frontend-3.0.0/frontend-$previous_frontend_ver/g" $res_myGitRepo_resourcePath/Dockerfile
             - sed -i "s/1.0.0/$previous_backend_ver/g" $res_myGitRepo_resourcePath/Dockerfile
           onComplete:
