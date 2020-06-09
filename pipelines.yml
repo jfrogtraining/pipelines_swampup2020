@@ -263,9 +263,6 @@ pipelines:
         execution:
           onStart:
             - helm init --service-account tiller --tiller-namespace default
-            - helm version
-            - helm list
-            - kubectl version
             - add_run_variables running_pod_name="$(kubectl get pods | awk '/docker-app-chart-docker-app-chart/{print $1}')"
             - if [ ! -z "$running_pod_name" ]; then kubectl delete pods $running_pod_name; fi
             - add_run_variables deployment_name="$(kubectl get deployments | awk '/docker-app-chart-docker-app-chart/{print $1}')"
