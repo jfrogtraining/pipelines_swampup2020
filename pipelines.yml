@@ -162,7 +162,7 @@ pipelines:
           onStart:
             - if [ -z $app_version ]; then add_pipeline_variables app_version=1.0.0; else add_pipeline_variables app_version=$(bump_semver $app_version minor); fi
             - echo $app_version
-            - add_pipeline_variables latest_docker_ver='$run_number'
+            - add_pipeline_variables 3='$run_number'
             - sed -i "s/frontend-3.0.0/frontend-$previous_frontend_ver/g" $res_myGitRepo_resourcePath/Dockerfile
             - sed -i "s/1.0.0/$previous_backend_ver/g" $res_myGitRepo_resourcePath/Dockerfile
           onComplete:
@@ -232,8 +232,9 @@ pipelines:
             - sed -i "s/docker.artifactory/docker.artifactory-unified.soleng-us.jfrog.team/" values.yaml
             - sed -i "s/docker-app/swampup_docker_app_demo/" values.yaml
             - sed -i "s/0.1.1/0.1.$run_number/g" Chart.yaml
-            - sed -i "s/latest/1.1.1/" values.yaml
-            - sed -i "s/1.1.1/$triggerBuildInfoNumber/" values.yaml
+            #- sed -i "s/latest/1.1.1/" values.yaml
+            #- sed -i "s/1.1.1/$triggerBuildInfoNumber/" values.yaml
+            #- sed -i "s/1.1.1/$latest_docker_ver/" values.yaml
             #- sed -i "s/latest/${res_myBuildInfo_buildNumber}/" values.yaml
       - name: promote_helm_chart
         type: PromoteBuild
@@ -294,9 +295,9 @@ pipelines:
             #- if [[ $PAGE =~ "swampup" ]]; then echo "swampup found" fi
             - if curl -Is "http://$pod_ip:8088/index.html"; then add_run_variables dockerAppStatus="pass"; else add_run_variables dockerAppStatus="fail"; fi
             - if curl -Is "http://$pod_ip:8088/index.html"; then add_run_variables docker_promotion_repo=docker-prod-local; else add_run_variables docker_promotion_repo=docker-archive-local; fi
-            - if curl -Is "http://$pod_ip:8088/index.html"; then echo "Our Docker app IS Running"; else echo "Our Docker app is NOT Running"; fi
           onComplete: #always
-            - echo "docker image status is $dockerAppStatus"          
+            - echo "docker image status is $dockerAppStatus" 
+            - if curl -Is "http://$pod_ip:8088/index.html"; then add_pipeline_variables latest_docker_ver="${triggerBuildInfoNumber}"; fi
       - name: promote_docker_app
         type: PromoteBuild
         configuration:
@@ -315,7 +316,7 @@ pipelines:
           onStart:
             - echo "Promotion repo is $docker_promotion_repo"
             - curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X PUT $int_ArtifactoryUnified_url/api/storage/docker-dev-local/swampup_docker_app_demo/$triggerBuildInfoNumber/manifest.json?properties=qa.functional-test=$dockerAppStatus
-            - curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X DELETE $int_ArtifactoryUnified_url/docker-prod-local/swampup_docker_app_demo/latest
+            - if [ "$dockerAppStatus" == "pass" ]; then curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X DELETE $int_ArtifactoryUnified_url/docker-prod-local/swampup_docker_app_demo/latest; fi
             #- 'curl -H "Authorization: token ${int_Github_SolEng_token}" ${int_Github_SolEng_url}/rate_limit'
             - add_pipeline_variables prev_runid=$run_id
             - echo $app_version
