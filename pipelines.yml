@@ -230,7 +230,7 @@ pipelines:
             - sed -i "s/docker-app/swampup_docker_app_demo/" values.yaml
             - sed -i "s/0.1.1/0.1.$run_number/g" Chart.yaml
             - if [ ! -z "$latest_docker_ver" ]; then add_pipeline_variables latest_docker_ver=$triggerBuildInfoNumber; fi
-            - sed -i "s/latest/$latest_docker_ver/" values.yaml; fi
+            - sed -i "s/latest/$latest_docker_ver/" values.yaml
             #- sed -i "s/latest/1.1.1/" values.yaml
             #- sed -i "s/1.1.1/$triggerBuildInfoNumber/" values.yaml
             #- sed -i "s/1.1.1/$latest_docker_ver/" values.yaml
