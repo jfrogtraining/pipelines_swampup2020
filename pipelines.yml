@@ -229,7 +229,7 @@ pipelines:
             - sed -i "s/docker.artifactory/docker.artifactory-unified.soleng-us.jfrog.team/" values.yaml
             - sed -i "s/docker-app/swampup_docker_app_demo/" values.yaml
             - sed -i "s/0.1.1/0.1.$run_number/g" Chart.yaml
-            - if [ ! -z "$latest_docker_ver" ]; then add_pipeline_variables $latest_docker_ver=triggerBuildInfoNumber; fi
+            - if [ ! -z "$latest_docker_ver" ]; then add_pipeline_variables latest_docker_ver=$triggerBuildInfoNumber; fi
             - sed -i "s/latest/$latest_docker_ver/" values.yaml; fi
             #- sed -i "s/latest/1.1.1/" values.yaml
             #- sed -i "s/1.1.1/$triggerBuildInfoNumber/" values.yaml
@@ -293,7 +293,7 @@ pipelines:
             - if curl -Is "http://$pod_ip:8088/index.html"; then add_run_variables docker_promotion_repo=docker-prod-local; else add_run_variables docker_promotion_repo=docker-archive-local; fi
           onComplete: #always
             - echo "docker image status is $dockerAppStatus" 
-            - if curl -Is "http://$pod_ip:8088/index.html"; then add_pipeline_variables latest_docker_ver="${triggerBuildInfoNumber}"; fi
+            - if curl -Is "http://$pod_ip:8088/index.html"; then latest_docker_ver="${triggerBuildInfoNumber}"; fi
       - name: promote_docker_app
         type: PromoteBuild
         configuration:
