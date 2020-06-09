@@ -130,7 +130,6 @@ pipelines:
             - sed -i "s/3.0.0/$my_env_var/g" package.json
             - curl -fL https://getcli.jfrog.io | sh 
             - ./jfrog rt config --url $int_ArtifactoryUnified_url --user $int_ArtifactoryUnified_user --apikey $int_ArtifactoryUnified_apikey --interactive=false
-            - ./jfrog rt c show
             - ./jfrog rt npmc --server-id-resolve $server_name --server-id-deploy $server_name --repo-resolve $repositoryName --repo-deploy $repositoryName
             - ./jfrog rt npm-install --build-name=$pipeline_name --build-number=$run_number
             - ./jfrog rt bce $pipeline_name $run_number
@@ -160,8 +159,6 @@ pipelines:
             - name: bld_frontend
         execution:
           onStart:
-            - if [ -z $app_version ]; then add_pipeline_variables app_version=1.0.0; else add_pipeline_variables app_version=$(bump_semver $app_version minor); fi
-            - echo $app_version
             - add_pipeline_variables latest_docker_ver='$run_number'
             - sed -i "s/frontend-3.0.0/frontend-$previous_frontend_ver/g" $res_myGitRepo_resourcePath/Dockerfile
             - sed -i "s/1.0.0/$previous_backend_ver/g" $res_myGitRepo_resourcePath/Dockerfile
@@ -315,12 +312,10 @@ pipelines:
             - curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X PUT $int_ArtifactoryUnified_url/api/storage/docker-dev-local/swampup_docker_app_demo/$triggerBuildInfoNumber/manifest.json?properties=qa.functional-test=$dockerAppStatus
             - if [ "$dockerAppStatus" == "pass" ]; then curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X DELETE $int_ArtifactoryUnified_url/docker-prod-local/swampup_docker_app_demo/latest; fi
             #- 'curl -H "Authorization: token ${int_Github_SolEng_token}" ${int_Github_SolEng_url}/rate_limit'
-            - add_pipeline_variables prev_runid=$run_id
-            - echo $app_version
           onSuccess:
             - if [ "$dockerAppStatus" == "pass" ]; then curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey $int_ArtifactoryUnified_url/api/docker/docker-prod-local/v2/promote -X POST -H 'Content-Type:application/json' -d '{"targetRepo":"docker-prod-local", "dockerRepository":"swampup_docker_app_demo", "tag":"'"$triggerBuildInfoNumber"'", "targetTag":"latest", "copy":true}'; fi
             - if [ "$dockerAppStatus" == "pass" ]; then curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X PUT $int_ArtifactoryUnified_url/api/storage/docker-prod-local/swampup_docker_app_demo/latest/manifest.json?properties=docker.refersTo=$triggerBuildInfoNumber; fi
-            - if [ "$dockerAppStatus" == "pass" ]; then send_notification SlackSolEng --text "successfully completed $pipeline_name version $app_version"; else send_notification SlackSolEng --text "unsuccessfully completed $pipeline_name version $app_version"; fi
+            - if [ "$dockerAppStatus" == "pass" ]; then send_notification SlackSolEng --text "successfully completed $pipeline_name version $my_env_var"; else send_notification SlackSolEng --text "unsuccessfully completed $pipeline_name version $my_env_var"; fi
    
   - name: swampup_release_mgmt
     steps:
