@@ -230,25 +230,15 @@ pipelines:
             - name: myHelmBuildInfo
         execution:
           onStart:
-            - echo "Preparing for work..."
             - pushd $res_myGitRepo_resourcePath/docker-app-chart
             - add_pipeline_variables triggerBuildInfoName="${res_myBuildInfo_buildName}"
             - add_pipeline_variables triggerBuildInfoNumber="${res_myBuildInfo_buildNumber}"
             - sed -i "s/docker.artifactory/docker.artifactory-unified.soleng-us.jfrog.team/" values.yaml
             - sed -i "s/docker-app/swampup_docker_app_demo/" values.yaml
             - sed -i "s/0.1.1/0.1.$run_number/g" Chart.yaml
-            - cat values.yaml
             - sed -i "s/latest/1.1.1/" values.yaml
-            - cat values.yaml
             - sed -i "s/1.1.1/$triggerBuildInfoNumber/" values.yaml
-            - cat values.yaml
             #- sed -i "s/latest/${res_myBuildInfo_buildNumber}/" values.yaml
-          onSuccess:
-            - echo "Job well done!"
-          onFailure:
-            - echo "uh oh, something went wrong"
-          onComplete: #always
-            - echo "Cleaning up some stuff"
       - name: promote_helm_chart
         type: PromoteBuild
         configuration:
@@ -277,27 +267,22 @@ pipelines:
           onStart:
             - helm init --service-account tiller --tiller-namespace default
             - helm version
-            #- helm del --purge docker-app-chart
             - helm list
             - kubectl version
             - add_run_variables running_pod_name="$(kubectl get pods | awk '/docker-app-chart-docker-app-chart/{print $1}')"
             - if [ ! -z "$running_pod_name" ]; then kubectl delete pods $running_pod_name; fi
             - add_run_variables deployment_name="$(kubectl get deployments | awk '/docker-app-chart-docker-app-chart/{print $1}')"
             - echo "deployment name is $deployment_name"
-            #- kubectl delete deployment docker-app-chart-docker-app-chart
             - if [ "$deployment_name" == "docker-app-chart-docker-app-chart" ]; then kubectl delete deployment docker-app-chart-docker-app-chart; fi
             - if [ "$deployment_name" == "docker-app-chart-docker-app-chart" ]; then sleep 20; fi
           onSuccess:
             - kubectl get pods --namespace default
-          onFailure:
-            - echo "uh oh, something went wrong"
           onComplete: #always
             - sleep 20
             - kubectl get pods --no-headers=true | awk '/docker-app-chart-docker-app-chart/{print $1}'
             - add_run_variables pod_name="$(kubectl get pods --no-headers=true | awk '/docker-app-chart-docker-app-chart/{print $1}')"
             - add_run_variables pod_ip="$(kubectl describe pod $pod_name | grep "IP:" | awk '{print $2}')"
-            - echo "pod name is $pod_name"
-            - echo "pod ip is $pod_ip"
+            - echo "pod name is $pod_name and pod ip is $pod_ip"
       - name: test_docker_app
         type: Bash
         configuration:
@@ -307,27 +292,15 @@ pipelines:
             - name: ArtifactoryUnified
         execution:
           onStart:
-            #- echo $res_DockerAppImage_imageName
-            #- echo $res_DockerAppImage_imageTag
             - echo "testing docker application" #$latest_docker_ver
           onExecute:
             #- PAGE=$(curl -s "http://localhost:8088/index.html" | tr '[:upper:]' '[:lower:]')
             #- if [[ $PAGE =~ "swampup" ]]; then echo "swampup found" fi
-            #- add_run_variables docker_promotion_repo=docker-prod-local
-            #- 'curl -Is "http://localhost:8088/index.html" 2>/dev/null' > test.txt
-            #- cat test.txt
             - if curl -Is "http://$pod_ip:8088/index.html"; then add_run_variables dockerAppStatus="pass"; else add_run_variables dockerAppStatus="fail"; fi
             - if curl -Is "http://$pod_ip:8088/index.html"; then add_run_variables docker_promotion_repo=docker-prod-local; else add_run_variables docker_promotion_repo=docker-archive-local; fi
             - if curl -Is "http://$pod_ip:8088/index.html"; then echo "Our Docker app IS Running"; else echo "Our Docker app is NOT Running"; fi
-          onSuccess:
-            - echo "Job well done!"
-            #- echo "items.find({\"name\":\"manifest.json\",\"@build.name\":\"${res_myPromotedBuildInfo_buildName}\",\"@build.number\":\"${res_myPromotedBuildInfo_buildNumber}\"}).include(\"@docker.tag\")" > aql.json
-            #- curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X PUT $int_ArtifactoryUnified_url/api/storage/docker-dev-local/swampup_docker_app_demo/${res_myBuildInfo_buildNumber}/manifest.json?properties=qa.functional-test=$dockerAppStatus
-          onFailure:
-            - echo "uh oh, something went wrong"
           onComplete: #always
             - echo "docker image status is $dockerAppStatus"          
-      
       - name: promote_docker_app
         type: PromoteBuild
         configuration:
@@ -350,20 +323,11 @@ pipelines:
             #- 'curl -H "Authorization: token ${int_Github_SolEng_token}" ${int_Github_SolEng_url}/rate_limit'
             - add_pipeline_variables prev_runid=$run_id
             - echo $app_version
-            #- echo $latest_docker_ver
           onSuccess:
             - if [ "$dockerAppStatus" == "pass" ]; then curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey $int_ArtifactoryUnified_url/api/docker/docker-prod-local/v2/promote -X POST -H 'Content-Type:application/json' -d '{"targetRepo":"docker-prod-local", "dockerRepository":"swampup_docker_app_demo", "tag":"'"$triggerBuildInfoNumber"'", "targetTag":"latest", "copy":true}'; fi
             - if [ "$dockerAppStatus" == "pass" ]; then curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X PUT $int_ArtifactoryUnified_url/api/storage/docker-prod-local/swampup_docker_app_demo/latest/manifest.json?properties=docker.refersTo=$triggerBuildInfoNumber; fi
-            #- >-
-            #  curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey $int_ArtifactoryUnified_url/api/docker/docker-prod-local/v2/promote
-            #  -X POST -H 'Content-Type:application/json' -d
-            #  '{"targetRepo":"docker-prod-local", "dockerRepository":"swampup_docker_app_demo", "tag":"'"${res_myBuildInfo_buildNumber}"'", "targetTag":"latest", "copy":true}'
-            #- curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X PUT $int_ArtifactoryUnified_url/api/storage/docker-prod-local/swampup_docker_app_demo/latest/manifest.json?properties=docker.refersTo=$run_number
             - if [ "$dockerAppStatus" == "pass" ]; then send_notification SlackSolEng --text "successfully completed $pipeline_name version $app_version"; else send_notification SlackSolEng --text "unsuccessfully completed $pipeline_name version $app_version"; fi
-            #- send_notification SlackSolEng --text "successfully completed $pipeline_name version $app_version"
-
-  
-  
+   
   - name: swampup_release_mgmt
     steps:
       - name: release_bundle
