@@ -229,6 +229,7 @@ pipelines:
             - sed -i "s/docker.artifactory/docker.artifactory-unified.soleng-us.jfrog.team/" values.yaml
             - sed -i "s/docker-app/swampup_docker_app_demo/" values.yaml
             - sed -i "s/0.1.1/0.1.$run_number/g" Chart.yaml
+            - if [ -z "$latest_docker_ver" ]; then sed -i "s/latest/$latest_docker_ver/" values.yaml; fi
             #- sed -i "s/latest/1.1.1/" values.yaml
             #- sed -i "s/1.1.1/$triggerBuildInfoNumber/" values.yaml
             #- sed -i "s/1.1.1/$latest_docker_ver/" values.yaml
@@ -308,7 +309,7 @@ pipelines:
             - name: myPromotedBuildInfo
         execution:
           onStart:
-            - echo "Promotion repo is $docker_promotion_repo"
+            - echo "Promotion repo is $docker_promotion_repo and latest version is $latest_docker_ver"
             - curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X PUT $int_ArtifactoryUnified_url/api/storage/docker-dev-local/swampup_docker_app_demo/$triggerBuildInfoNumber/manifest.json?properties=qa.functional-test=$dockerAppStatus
             - if [ "$dockerAppStatus" == "pass" ]; then curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X DELETE $int_ArtifactoryUnified_url/docker-prod-local/swampup_docker_app_demo/latest; fi
             #- 'curl -H "Authorization: token ${int_Github_SolEng_token}" ${int_Github_SolEng_url}/rate_limit'
