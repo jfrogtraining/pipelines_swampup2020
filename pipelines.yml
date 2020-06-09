@@ -286,6 +286,7 @@ pipelines:
             - echo "deployment name is $deployment_name"
             #- kubectl delete deployment docker-app-chart-docker-app-chart
             - if [ "$deployment_name" == "docker-app-chart-docker-app-chart" ]; then kubectl delete deployment docker-app-chart-docker-app-chart; fi
+            - if [ "$deployment_name" == "docker-app-chart-docker-app-chart" ]; then sleep 20; fi
           onSuccess:
             - kubectl get pods --namespace default
           onFailure:
