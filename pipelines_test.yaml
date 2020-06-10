@@ -8,26 +8,26 @@ resources:
         include: master
       buildOn:
         commit: false
-  - name: DockerAppImage
-    type: Image
-    configuration:
-      registry: ArtifactoryUnified #ArtifactoryDockerRegistry
-      sourceRepository: docker
-      imageName: docker.artifactory-unified.soleng-us.jfrog.team/swampup_docker_app_demo
-      imageTag: '${run_number}'
-      autoPull: true
-  - name: myBuildInfo
-    type: BuildInfo
-    configuration:
-      sourceArtifactory: ArtifactoryUnified
-      buildName: SampleApp
-      buildNumber: 1
-  - name: myPromotedBuildInfo
-    type: BuildInfo
-    configuration:
-      sourceArtifactory: ArtifactoryUnified
-      buildName: SampleApp
-      buildNumber: 1
+#   - name: DockerAppImage
+#     type: Image
+#     configuration:
+#       registry: ArtifactoryUnified #ArtifactoryDockerRegistry
+#       sourceRepository: docker
+#       imageName: docker.artifactory-unified.soleng-us.jfrog.team/swampup_docker_app_demo
+#       imageTag: '${run_number}'
+#       autoPull: true
+#   - name: myBuildInfo
+#     type: BuildInfo
+#     configuration:
+#       sourceArtifactory: ArtifactoryUnified
+#       buildName: SampleApp
+#       buildNumber: 1
+#   - name: myPromotedBuildInfo
+#     type: BuildInfo
+#     configuration:
+#       sourceArtifactory: ArtifactoryUnified
+#       buildName: SampleApp
+#       buildNumber: 1
   
 pipelines:
   - name: swampup_docker_app_pipeline
@@ -35,99 +35,99 @@ pipelines:
       environmentVariables:
         readOnly:
            my_env_var: '1.0.$run_number'
-    steps:
-      - name: bld_backend
-        type: MvnBuild
-        configuration:
-          sourceLocation: java-backend-service
-          mvnCommand: clean install -ntp
-          configFileLocation: .
-          configFileName: mvn-art-config
-          inputResources:
-            - name: myGitRepo
-          integrations:
-            - name: ArtifactoryUnified
-          runtime:
-            type: image
-            image:
-              auto:
-                language: java
-                versions:
-                  - "11"
-        execution:
-          onStart:
-            - javac -version
-            - mvn --version
-            - add_pipeline_variables previous_backend_ver=${my_env_var}
-            - sed -ie 's/Default-Server/ArtifactoryUnified/g' $res_myGitRepo_resourcePath/java-backend-service/mvn-art-config
-            - sed -ie "s/1.0.0/$my_env_var/g" $res_myGitRepo_resourcePath/java-backend-service/pom.xml
-          onComplete:
-            - echo $run_var
-            - echo "Running $pipeline_name | $step_name on node ID $step_node_id"
-      - name: bld_frontend
-        type: Bash
-        configuration:
-          environmentVariables:
-            step_env_var2: "hello"
-            server_name: ArtifactoryUnified
-            repositoryName : npm
-          inputResources:
-            - name: myGitRepo
-              trigger: false
-          integrations:
-            - name: ArtifactoryUnified
-        execution:
-          onStart:
-            - rm -rf $run_dir/workspace/jfrog
-            - pushd $res_myGitRepo_resourcePath/npm-frontend-service
-            - add_pipeline_variables previous_frontend_ver=${my_env_var}
-            - sed -i "s/3.0.0/$my_env_var/g" package.json
-            - curl -fL https://getcli.jfrog.io | sh 
-            - ./jfrog rt config --url $int_ArtifactoryUnified_url --user $int_ArtifactoryUnified_user --apikey $int_ArtifactoryUnified_apikey --interactive=false
-            - ./jfrog rt npmc --server-id-resolve $server_name --server-id-deploy $server_name --repo-resolve $repositoryName --repo-deploy $repositoryName
-            - ./jfrog rt npm-install --build-name=$pipeline_name --build-number=$run_number
-            - ./jfrog rt bce $pipeline_name $run_number
-            - ./jfrog rt npm-publish --build-name=$pipeline_name --build-number=$run_number
-            - ./jfrog rt bp $pipeline_name $run_number
-            - ./jfrog rt bs $pipeline_name $run_number --fail=false
-            - add_run_files /tmp/jfrog/. jfrog
-          onComplete:
-            - echo $step_env_var2
-            - echo "Running $pipeline_name | $step_name on node ID $step_node_id"
-      - name: bld_docker_app
-        type: DockerBuild
-        configuration:
-          affinityGroup: fmkGroup
-          dockerFileLocation: .
-          dockerFileName: Dockerfile
-          dockerImageName: docker.artifactory-unified.soleng-us.jfrog.team/swampup_docker_app_demo
-          dockerImageTag: '${run_number}'
-          integrations:
-            - name: ArtifactoryUnified
-          inputResources:
-            - name: myGitRepo
-          outputResources:
-            - name: DockerAppImage
-          inputSteps:
-            - name: bld_backend
-            - name: bld_frontend
-        execution:
-          onStart:
-            - sed -i "s/frontend-3.0.0/frontend-$previous_frontend_ver/g" $res_myGitRepo_resourcePath/Dockerfile
-            - sed -i "s/1.0.0/$previous_backend_ver/g" $res_myGitRepo_resourcePath/Dockerfile
-          onComplete:
-            - echo $step_env_var2
-            - echo "Running $pipeline_name | $step_name on node ID $step_node_id"
-      - name: push_docker_app
-        type: DockerPush
-        configuration:
-          affinityGroup: fmkGroup
-          targetRepository: docker
-          forceXrayScan: true
-          autoPublishBuildInfo: true
-          integrations:
-            - name: ArtifactoryUnified
-          inputSteps:
-            - name: bld_docker_app
-          outputResources:
-            - name: myBuildInfo
+#     steps:
+#       - name: bld_backend
+#         type: MvnBuild
+#         configuration:
+#           sourceLocation: java-backend-service
+#           mvnCommand: clean install -ntp
+#           configFileLocation: .
+#           configFileName: mvn-art-config
+#           inputResources:
+#             - name: myGitRepo
+#           integrations:
+#             - name: ArtifactoryUnified
+#           runtime:
+#             type: image
+#             image:
+#               auto:
+#                 language: java
+#                 versions:
+#                   - "11"
+#         execution:
+#           onStart:
+#             - javac -version
+#             - mvn --version
+#             - add_pipeline_variables previous_backend_ver=${my_env_var}
+#             - sed -ie 's/Default-Server/ArtifactoryUnified/g' $res_myGitRepo_resourcePath/java-backend-service/mvn-art-config
+#             - sed -ie "s/1.0.0/$my_env_var/g" $res_myGitRepo_resourcePath/java-backend-service/pom.xml
+#           onComplete:
+#             - echo $run_var
+#             - echo "Running $pipeline_name | $step_name on node ID $step_node_id"
+#       - name: bld_frontend
+#         type: Bash
+#         configuration:
+#           environmentVariables:
+#             step_env_var2: "hello"
+#             server_name: ArtifactoryUnified
+#             repositoryName : npm
+#           inputResources:
+#             - name: myGitRepo
+#               trigger: false
+#           integrations:
+#             - name: ArtifactoryUnified
+#         execution:
+#           onStart:
+#             - rm -rf $run_dir/workspace/jfrog
+#             - pushd $res_myGitRepo_resourcePath/npm-frontend-service
+#             - add_pipeline_variables previous_frontend_ver=${my_env_var}
+#             - sed -i "s/3.0.0/$my_env_var/g" package.json
+#             - curl -fL https://getcli.jfrog.io | sh 
+#             - ./jfrog rt config --url $int_ArtifactoryUnified_url --user $int_ArtifactoryUnified_user --apikey $int_ArtifactoryUnified_apikey --interactive=false
+#             - ./jfrog rt npmc --server-id-resolve $server_name --server-id-deploy $server_name --repo-resolve $repositoryName --repo-deploy $repositoryName
+#             - ./jfrog rt npm-install --build-name=$pipeline_name --build-number=$run_number
+#             - ./jfrog rt bce $pipeline_name $run_number
+#             - ./jfrog rt npm-publish --build-name=$pipeline_name --build-number=$run_number
+#             - ./jfrog rt bp $pipeline_name $run_number
+#             - ./jfrog rt bs $pipeline_name $run_number --fail=false
+#             - add_run_files /tmp/jfrog/. jfrog
+#           onComplete:
+#             - echo $step_env_var2
+#             - echo "Running $pipeline_name | $step_name on node ID $step_node_id"
+#       - name: bld_docker_app
+#         type: DockerBuild
+#         configuration:
+#           affinityGroup: fmkGroup
+#           dockerFileLocation: .
+#           dockerFileName: Dockerfile
+#           dockerImageName: docker.artifactory-unified.soleng-us.jfrog.team/swampup_docker_app_demo
+#           dockerImageTag: '${run_number}'
+#           integrations:
+#             - name: ArtifactoryUnified
+#           inputResources:
+#             - name: myGitRepo
+#           outputResources:
+#             - name: DockerAppImage
+#           inputSteps:
+#             - name: bld_backend
+#             - name: bld_frontend
+#         execution:
+#           onStart:
+#             - sed -i "s/frontend-3.0.0/frontend-$previous_frontend_ver/g" $res_myGitRepo_resourcePath/Dockerfile
+#             - sed -i "s/1.0.0/$previous_backend_ver/g" $res_myGitRepo_resourcePath/Dockerfile
+#           onComplete:
+#             - echo $step_env_var2
+#             - echo "Running $pipeline_name | $step_name on node ID $step_node_id"
+#       - name: push_docker_app
+#         type: DockerPush
+#         configuration:
+#           affinityGroup: fmkGroup
+#           targetRepository: docker
+#           forceXrayScan: true
+#           autoPublishBuildInfo: true
+#           integrations:
+#             - name: ArtifactoryUnified
+#           inputSteps:
+#             - name: bld_docker_app
+#           outputResources:
+#             - name: myBuildInfo
