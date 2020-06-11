@@ -6,8 +6,8 @@ resources:
       path: jfrogtraining/pipelines_swampup2020
       branches:
         include: master
-      buildOn:
-        commit: false
+      #buildOn:
+        #commit: false
 #   - name: DockerAppImage
 #     type: Image
 #     configuration:
