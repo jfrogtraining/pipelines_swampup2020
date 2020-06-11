@@ -6,12 +6,10 @@ resources:
       path: jfrogtraining/pipelines_swampup2020
       branches:
         include: master
-      buildOn:
-         commit: true
   - name: DockerAppImage
     type: Image
     configuration:
-      registry: ArtifactoryUnified #ArtifactoryDockerRegistry
+      registry: ArtifactoryUnified
       sourceRepository: docker
       imageName: docker.artifactory-unified.soleng-us.jfrog.team/swampup_docker_app_demo
       imageTag: '${run_number}'
@@ -188,7 +186,8 @@ pipelines:
         type: HelmPublish
         configuration:
           chartPath: docker-app-chart/
-          autoPublishBuildInfo: true                    # default false         
+          forceXrayScan: true
+          autoPublishBuildInfo: true        
           inputResources:
             - name: myGitRepo
               trigger: false
