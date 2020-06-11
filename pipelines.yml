@@ -132,13 +132,14 @@ pipelines:
             - curl -fL https://getcli.jfrog.io | sh 
             - ./jfrog rt config --url $int_ArtifactoryUnified_url --user $int_ArtifactoryUnified_user --apikey $int_ArtifactoryUnified_apikey --interactive=false
             - ./jfrog rt npmc --server-id-resolve $server_name --server-id-deploy $server_name --repo-resolve $repositoryName --repo-deploy $repositoryName
+          onExecute:
             - ./jfrog rt npm-install --build-name=$pipeline_name --build-number=$run_number
             - ./jfrog rt bce $pipeline_name $run_number
             - ./jfrog rt npm-publish --build-name=$pipeline_name --build-number=$run_number
             - ./jfrog rt bp $pipeline_name $run_number
             - ./jfrog rt bs $pipeline_name $run_number --fail=false
-            - add_run_files /tmp/jfrog/. jfrog
           onComplete:
+            - add_run_files /tmp/jfrog/. jfrog
             - echo $step_env_var2
             - echo "Running $pipeline_name | $step_name on node ID $step_node_id"
       - name: bld_docker_app
