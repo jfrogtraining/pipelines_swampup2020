@@ -139,7 +139,7 @@ pipelines:
             - ./jfrog rt bp $pipeline_name $run_number
             - ./jfrog rt bs $pipeline_name $run_number --fail=false
           onComplete:
-            - add_run_files /tmp/jfrog/. jfrog
+            - add_run_files /tmp/jfrog/.jfrog
             - echo $step_env_var2
             - echo "Running $pipeline_name | $step_name on node ID $step_node_id"
       - name: bld_docker_app
