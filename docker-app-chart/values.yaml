@@ -7,7 +7,7 @@ restartPolicy: Never
 
 image:
   repository: docker.artifactory/docker-app
-  tag: 1.1
+  tag: latest
   secretName: regsecret
   pullPolicy: Always
 
