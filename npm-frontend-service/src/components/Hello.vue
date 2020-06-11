@@ -1,7 +1,7 @@
 <template>
   <div class="hello">
     <div style="height:7em"></div>
-    <img alt="frog" src="./../assets/swampuplogo-1.png" class="responsive"/>    <div style="height:2em"></div>
+    <img alt="frog" src="./../assets/swamup_2020.jpg" class="responsive"/>    <div style="height:2em"></div>
     <h1 class="elementor-heading-title elementor-size-default">BECOME A LEAN, MEAN <span style="color:#40be46;&quot;">DEVOPS MACHINE</span></h1>  </div>
 </template>
 
