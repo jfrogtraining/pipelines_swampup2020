@@ -6,8 +6,6 @@ resources:
       path: jfrogtraining/pipelines_swampup2020
       branches:
         include: master
-      #buildOn:
-      #  commit: false
   - name: DockerAppImage
     type: Image
     configuration:
@@ -178,35 +176,6 @@ pipelines:
             - name: bld_docker_app
           outputResources:
             - name: myBuildInfo
-#       - name: promote_docker_app
-#         type: PromoteBuild
-#         configuration:
-#           targetRepository: ${docker_promotion_repo} #docker-prod-local
-#           integrations:
-#             - name: ArtifactoryUnified
-#             - name: SlackSolEng
-#             - name: Github_SolEng
-#           inputSteps:
-#             - name: push_docker_app
-#           inputResources:
-#             - name: myBuildInfo
-#           outputResources:
-#             - name: myPromotedBuildInfo
-#         execution:
-#           onStart:
-#             - curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X DELETE $int_ArtifactoryUnified_url/docker-prod-local/swampup_docker_app_demo/latest
-#             - 'curl -H "Authorization: token ${int_Github_SolEng_token}" ${int_Github_SolEng_url}/rate_limit'
-#             - add_pipeline_variables prev_runid=$run_id
-#             - echo $app_version
-#             - echo $latest_docker_ver
-#           onSuccess:
-#             - >-
-#               curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey $int_ArtifactoryUnified_url/api/docker/docker-prod-local/v2/promote
-#               -X POST -H 'Content-Type:application/json' -d
-#               '{"targetRepo":"docker-prod-local", "dockerRepository":"swampup_docker_app_demo", "tag":"'"$run_number"'", "targetTag":"latest", "copy":true}'
-#             - curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X PUT $int_ArtifactoryUnified_url/api/storage/docker-prod-local/swampup_docker_app_demo/latest/manifest.json?properties=docker.refersTo=$run_number
-#             - if [ "$dockerAppStatus" == "pass" ]; then send_notification SlackSolEng --text "successfully completed $pipeline_name version $app_version"; else send_notification SlackSolEng --text "unsuccessfully completed $pipeline_name version $app_version"; fi
-#             #- send_notification SlackSolEng --text "successfully completed $pipeline_name version $app_version"
 
   - name: swampup_docker_app_helm_deploy
     steps:
@@ -231,7 +200,6 @@ pipelines:
             - sed -i "s/0.1.1/0.1.$run_number/g" Chart.yaml
             - sed -i "s/latest/1.1.1/" values.yaml
             - sed -i "s/1.1.1/$triggerBuildInfoNumber/" values.yaml
-            #- sed -i "s/latest/${res_myBuildInfo_buildNumber}/" values.yaml
       - name: promote_helm_chart
         type: PromoteBuild
         configuration:
@@ -293,7 +261,7 @@ pipelines:
       - name: promote_docker_app
         type: PromoteBuild
         configuration:
-          targetRepository: ${docker_promotion_repo} #docker-prod-local
+          targetRepository: ${docker_promotion_repo}
           integrations:
             - name: ArtifactoryUnified
             - name: SlackSolEng
