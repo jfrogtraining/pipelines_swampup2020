@@ -132,6 +132,7 @@ pipelines:
             - curl -fL https://getcli.jfrog.io | sh 
             - ./jfrog rt config --url $int_ArtifactoryUnified_url --user $int_ArtifactoryUnified_user --apikey $int_ArtifactoryUnified_apikey --interactive=false
             - ./jfrog rt npmc --server-id-resolve $server_name --server-id-deploy $server_name --repo-resolve $repositoryName --repo-deploy $repositoryName
+            - ./jfrog rt c show
           onExecute:
             - ./jfrog rt npm-install --build-name=$pipeline_name --build-number=$run_number
             - ./jfrog rt bce $pipeline_name $run_number
