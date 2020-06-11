@@ -7,7 +7,7 @@ resources:
       branches:
         include: master
       buildOn:
-         commit: false
+         commit: true
   - name: DockerAppImage
     type: Image
     configuration:
