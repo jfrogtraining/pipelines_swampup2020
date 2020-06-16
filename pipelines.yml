@@ -278,7 +278,7 @@ pipelines:
 #         execution:
 #           onStart:
 #             - echo "Promotion repo is $docker_promotion_repo"
-#             - curl -u $int_ArtifactoryUnified_user:$int_artifactory_apikey -X PUT $int_artifactory_url/api/storage/docker-dev-local/swampup_docker_app_demo/$triggerBuildInfoNumber/manifest.json?properties=qa.functional-test=$dockerAppStatus
+#             - curl -u $int_artifactory_user:$int_artifactory_apikey -X PUT $int_artifactory_url/api/storage/docker-dev-local/swampup_docker_app_demo/$triggerBuildInfoNumber/manifest.json?properties=qa.functional-test=$dockerAppStatus
 #             - if [ "$dockerAppStatus" == "pass" ]; then curl -u $int_artifactory_user:$int_artifactory_apikey -X DELETE $int_artifactory_url/docker-prod-local/swampup_docker_app_demo/latest; fi
 #             #- 'curl -H "Authorization: token ${int_Github_SolEng_token}" ${int_Github_SolEng_url}/rate_limit'
 #           onSuccess:
