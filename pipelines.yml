@@ -79,7 +79,7 @@ pipelines:
       environmentVariables:
         readOnly:
            my_env_var: '1.0.$run_number'
-           ArtIP: $(echo ${int_ArtifactoryUnified_url}|awk -F '/' '{print $3}'|awk -F ':' '{print $1}')
+           ArtIP: $(echo ${int_ArtifactoryUnified_url}|awk -F '/' '{print $3}')
     steps:
       - name: bld_backend
         type: MvnBuild
@@ -139,7 +139,7 @@ pipelines:
           affinityGroup: fmkGroup
           dockerFileLocation: .
           dockerFileName: Dockerfile
-          dockerImageName: docker.${ArtIP}/swampup_docker_app_demo
+          dockerImageName: ${ArtIP}/docker/swampup_docker_app_demo
           dockerImageTag: '${run_number}'
           integrations:
             - name: ArtifactoryUnified
@@ -153,7 +153,7 @@ pipelines:
             - name: publish_frontend #bld_frontend
         execution:
           onStart:
-            - sed -i "s/docker.artifactory/docker.${ArtIP}/" $res_myGitRepo_resourcePath/Dockerfile
+            - sed -i "s/docker.artifactory/${ArtIP}/docker/" $res_myGitRepo_resourcePath/Dockerfile
             - sed -i "s/artifactory-unified.soleng-us.jfrog.team/${ArtIP}/" $res_myGitRepo_resourcePath/Dockerfile
             - sed -i "s/frontend-3.0.0/frontend-$previous_frontend_ver/g" $res_myGitRepo_resourcePath/Dockerfile
             - sed -i "s/1.0.0/$previous_backend_ver/g" $res_myGitRepo_resourcePath/Dockerfile
@@ -195,7 +195,7 @@ pipelines:
             - add_pipeline_variables triggerBuildInfoName="${res_myBuildInfo_buildName}"
             - add_pipeline_variables triggerBuildInfoNumber="${res_myBuildInfo_buildNumber}"
             - cat values.yaml
-            - sed -i "s/docker.artifactory/docker.${ArtIP}/" values.yaml
+            - sed -i "s/docker.artifactory/${ArtIP}/docker/" values.yaml
             - sed -i "s/docker-app/swampup_docker_app_demo/" values.yaml
             - sed -i "s/0.1.1/0.1.$run_number/g" Chart.yaml
             - sed -i "s/latest/1.1.1/" values.yaml
