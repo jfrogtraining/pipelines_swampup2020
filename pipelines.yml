@@ -261,8 +261,8 @@ pipelines:
           targetRepository: ${docker_promotion_repo}
           integrations:
             - name: ArtifactoryUnified
-            - name: SlackSolEng
-            #- name: Github_SolEng
+            #- name: SlackSolEng
+            - name: Github_SolEng
           inputSteps:
             - name: test_docker_app
           inputResources:
