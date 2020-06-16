@@ -9,7 +9,7 @@ resources:
   - name: DockerAppImage
     type: Image
     configuration:
-      registry: ArtifactoryUnified
+      registry: artifactory
       sourceRepository: docker
       imageName: docker.artifactory-unified.soleng-us.jfrog.team/swampup_docker_app_demo
       imageTag: '${run_number}'
@@ -17,57 +17,57 @@ resources:
   - name: myBuildInfo
     type: BuildInfo
     configuration:
-      sourceArtifactory: ArtifactoryUnified
+      sourceArtifactory: artifactory
       buildName: SampleApp
       buildNumber: 1
   - name: myPromotedBuildInfo
     type: BuildInfo
     configuration:
-      sourceArtifactory: ArtifactoryUnified
+      sourceArtifactory: artifactory
       buildName: SampleApp
       buildNumber: 1
   - name: myHelmBuildInfo
     type: BuildInfo
     configuration:
-      sourceArtifactory: ArtifactoryUnified
+      sourceArtifactory: artifactory
       buildName: SampleApp
       buildNumber: 1
   - name: myPromotedHelmBuildInfo
     type: BuildInfo
     configuration:
-      sourceArtifactory: ArtifactoryUnified
+      sourceArtifactory: artifactory
       buildName: SampleApp
       buildNumber: 1
   - name: MyHelmChart
     type: HelmChart
     configuration:
-      sourceArtifactory: ArtifactoryUnified
+      sourceArtifactory: artifactory
       repository: helm-local
       chart: docker-app-chart
       version: '0.1.${run_number}'
   - name: MyPromotedHelmChart
     type: HelmChart
     configuration:
-      sourceArtifactory: ArtifactoryUnified
+      sourceArtifactory: artifactory
       repository: helm-prod-local
       chart: docker-app-chart
       version: '0.1.${run_number}'
   - name: myReleaseBundle
     type: ReleaseBundle
     configuration:
-      sourceDistribution: Distribution
+      sourceDistribution: distribution
       name: swampup_rb
       version: v1.0.0
   - name: mySignedReleaseBundle
     type: ReleaseBundle
     configuration:
-      sourceDistribution: Distribution
+      sourceDistribution: distribution
       name: swampup_rb
       version: v1.0.0
   - name: myDistributionRules
     type: DistributionRule
     configuration:
-      sourceDistribution: Distribution
+      sourceDistribution: distribution
       serviceName: "Edge*"
       siteName: "Edge*"
       cityName: "*"
@@ -79,7 +79,7 @@ pipelines:
       environmentVariables:
         readOnly:
            my_env_var: '1.0.$run_number'
-           ArtIP: $(echo ${int_ArtifactoryUnified_url}|awk -F '/' '{print $3}')
+           ArtIP: $(echo ${int_artifactory_url}|awk -F '/' '{print $3}')
     steps:
       - name: bld_backend
         type: MvnBuild
@@ -92,7 +92,7 @@ pipelines:
             - name: myGitRepo
               trigger: false
           integrations:
-            - name: ArtifactoryUnified
+            - name: artifactory
           runtime:
             type: image
             image:
@@ -120,7 +120,7 @@ pipelines:
             - name: myGitRepo
               trigger: false
           integrations:
-            - name: ArtifactoryUnified
+            - name: artifactory
         execution:
           onStart:
             - add_pipeline_variables previous_frontend_ver=${my_env_var}
@@ -132,7 +132,7 @@ pipelines:
           inputSteps:
             - name: bld_frontend
           integrations:
-            - name: ArtifactoryUnified
+            - name: artifactory
       - name: bld_docker_app
         type: DockerBuild
         configuration:
@@ -142,7 +142,7 @@ pipelines:
           dockerImageName: ${ArtIP}/docker/swampup_docker_app_demo
           dockerImageTag: '${run_number}'
           integrations:
-            - name: ArtifactoryUnified
+            - name: artifactory
           inputResources:
             - name: myGitRepo
               trigger: false
@@ -171,7 +171,7 @@ pipelines:
           forceXrayScan: true
           autoPublishBuildInfo: true
           integrations:
-            - name: ArtifactoryUnified
+            - name: artifactory
           inputSteps:
             - name: bld_docker_app
           outputResources:
@@ -208,7 +208,7 @@ pipelines:
 #         configuration:
 #           targetRepository: helm-prod-local
 #           integrations:
-#             - name: ArtifactoryUnified
+#             - name: artifactory
 #           inputResources:
 #             - name: myHelmBuildInfo
 #             - name: MyHelmChart
@@ -250,7 +250,7 @@ pipelines:
 #           inputSteps:
 #             - name: deploy_helm
 #           integrations:
-#             - name: ArtifactoryUnified
+#             - name: artifactory
 #         execution:
 #           onStart:
 #             - echo "testing docker application" #$latest_docker_ver
@@ -266,7 +266,7 @@ pipelines:
 #         configuration:
 #           targetRepository: ${docker_promotion_repo}
 #           integrations:
-#             - name: ArtifactoryUnified
+#             - name: artifactory
 #             #- name: SlackSolEng
 #             - name: Github_SolEng
 #           inputSteps:
@@ -278,12 +278,12 @@ pipelines:
 #         execution:
 #           onStart:
 #             - echo "Promotion repo is $docker_promotion_repo"
-#             - curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X PUT $int_ArtifactoryUnified_url/api/storage/docker-dev-local/swampup_docker_app_demo/$triggerBuildInfoNumber/manifest.json?properties=qa.functional-test=$dockerAppStatus
-#             - if [ "$dockerAppStatus" == "pass" ]; then curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X DELETE $int_ArtifactoryUnified_url/docker-prod-local/swampup_docker_app_demo/latest; fi
+#             - curl -u $int_ArtifactoryUnified_user:$int_artifactory_apikey -X PUT $int_artifactory_url/api/storage/docker-dev-local/swampup_docker_app_demo/$triggerBuildInfoNumber/manifest.json?properties=qa.functional-test=$dockerAppStatus
+#             - if [ "$dockerAppStatus" == "pass" ]; then curl -u $int_artifactory_user:$int_artifactory_apikey -X DELETE $int_artifactory_url/docker-prod-local/swampup_docker_app_demo/latest; fi
 #             #- 'curl -H "Authorization: token ${int_Github_SolEng_token}" ${int_Github_SolEng_url}/rate_limit'
 #           onSuccess:
-#             - if [ "$dockerAppStatus" == "pass" ]; then curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey $int_ArtifactoryUnified_url/api/docker/docker-prod-local/v2/promote -X POST -H 'Content-Type:application/json' -d '{"targetRepo":"docker-prod-local", "dockerRepository":"swampup_docker_app_demo", "tag":"'"$triggerBuildInfoNumber"'", "targetTag":"latest", "copy":true}'; fi
-#             - if [ "$dockerAppStatus" == "pass" ]; then curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X PUT $int_ArtifactoryUnified_url/api/storage/docker-prod-local/swampup_docker_app_demo/latest/manifest.json?properties=docker.refersTo=$triggerBuildInfoNumber; fi
+#             - if [ "$dockerAppStatus" == "pass" ]; then curl -u $int_artifactory_user:$int_artifactory_apikey $int_artifactory_url/api/docker/docker-prod-local/v2/promote -X POST -H 'Content-Type:application/json' -d '{"targetRepo":"docker-prod-local", "dockerRepository":"swampup_docker_app_demo", "tag":"'"$triggerBuildInfoNumber"'", "targetTag":"latest", "copy":true}'; fi
+#             - if [ "$dockerAppStatus" == "pass" ]; then curl -u $int_artifactory_user:$int_artifactory_apikey -X PUT $int_artifactory_url/api/storage/docker-prod-local/swampup_docker_app_demo/latest/manifest.json?properties=docker.refersTo=$triggerBuildInfoNumber; fi
 #             #- if [ "$dockerAppStatus" == "pass" ]; then send_notification SlackSolEng --text "successfully completed $pipeline_name version $my_env_var"; else send_notification SlackSolEng --text "unsuccessfully completed $pipeline_name version $my_env_var"; fi
    
 #   - name: swampup_release_mgmt
