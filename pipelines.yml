@@ -79,6 +79,7 @@ pipelines:
       environmentVariables:
         readOnly:
            my_env_var: '1.0.$run_number'
+           ArtIP: $(echo ${int_ArtifactoryUnified_url}|awk -F '/' '{print $3}')
     steps:
       - name: bld_backend
         type: MvnBuild
@@ -138,7 +139,7 @@ pipelines:
           affinityGroup: fmkGroup
           dockerFileLocation: .
           dockerFileName: Dockerfile
-          dockerImageName: docker.artifactory-unified.soleng-us.jfrog.team/swampup_docker_app_demo
+          dockerImageName: docker.${ArtIP}/swampup_docker_app_demo
           dockerImageTag: '${run_number}'
           integrations:
             - name: ArtifactoryUnified
@@ -192,7 +193,7 @@ pipelines:
             - add_pipeline_variables triggerBuildInfoName="${res_myBuildInfo_buildName}"
             - add_pipeline_variables triggerBuildInfoNumber="${res_myBuildInfo_buildNumber}"
             - cat values.yaml
-            - sed -i "s/docker.artifactory/docker.artifactory-unified.soleng-us.jfrog.team/" values.yaml
+            - sed -i "s/docker.artifactory/docker.${ArtIP}/" values.yaml
             - sed -i "s/docker-app/swampup_docker_app_demo/" values.yaml
             - sed -i "s/0.1.1/0.1.$run_number/g" Chart.yaml
             - sed -i "s/latest/1.1.1/" values.yaml
