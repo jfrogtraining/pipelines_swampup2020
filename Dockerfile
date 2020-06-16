@@ -1,5 +1,5 @@
 #Download image from artifactory
-ARG REGISTRY=35.193.22.213:8082/docker
+ARG REGISTRY=docker.artifactory
 #FROM openjdk:11-jdk
 FROM $REGISTRY/openjdk:11-jdk
 
