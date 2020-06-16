@@ -174,150 +174,150 @@ pipelines:
           outputResources:
             - name: myBuildInfo
 
-  - name: swampup_docker_app_helm_deploy
-    steps:
-      - name: helm_build
-        type: HelmPublish
-        configuration:
-          chartPath: docker-app-chart/
-          forceXrayScan: true
-          autoPublishBuildInfo: true        
-          inputResources:
-            - name: myGitRepo
-              trigger: false
-            - name: myBuildInfo
-          outputResources:
-            - name: MyHelmChart
-            - name: myHelmBuildInfo
-        execution:
-          onStart:
-            - pushd $res_myGitRepo_resourcePath/docker-app-chart
-            - add_pipeline_variables triggerBuildInfoName="${res_myBuildInfo_buildName}"
-            - add_pipeline_variables triggerBuildInfoNumber="${res_myBuildInfo_buildNumber}"
-            - cat values.yaml
-            - sed -i "s/docker.artifactory/${ArtIP}/docker/" values.yaml
-            - sed -i "s/docker-app/swampup_docker_app_demo/" values.yaml
-            - sed -i "s/0.1.1/0.1.$run_number/g" Chart.yaml
-            - sed -i "s/latest/1.1.1/" values.yaml
-            - sed -i "s/1.1.1/$triggerBuildInfoNumber/" values.yaml
-      - name: promote_helm_chart
-        type: PromoteBuild
-        configuration:
-          targetRepository: helm-prod-local
-          integrations:
-            - name: ArtifactoryUnified
-          inputResources:
-            - name: myHelmBuildInfo
-            - name: MyHelmChart
-          outputResources:
-            - name: myPromotedHelmBuildInfo
-            - name: MyPromotedHelmChart
-      - name: deploy_helm
-        type: HelmDeploy
-        configuration:
-          releaseName: docker-app-chart
-          chartPath:   .
-          integrations:
-            - name: K8S_SA #SolEngUS
-          inputResources:
-            - name: MyPromotedHelmChart
-          flags: '--namespace default'
-          valueFilePaths:
-            - values.yaml
-        execution:
-          onStart:
-            - helm init --service-account tiller --tiller-namespace default
-            - add_run_variables running_pod_name="$(kubectl get pods | awk '/docker-app-chart-docker-app-chart/{print $1}')"
-            - if [ ! -z "$running_pod_name" ]; then kubectl delete pods $running_pod_name; fi
-            - add_run_variables deployment_name="$(kubectl get deployments | awk '/docker-app-chart-docker-app-chart/{print $1}')"
-            - echo "deployment name is $deployment_name"
-            - if [ "$deployment_name" == "docker-app-chart-docker-app-chart" ]; then kubectl delete deployment docker-app-chart-docker-app-chart; fi
-            - if [ "$deployment_name" == "docker-app-chart-docker-app-chart" ]; then sleep 20; fi
-          onSuccess:
-            - kubectl get pods --namespace default
-          onComplete: #always
-            - sleep 20
-            - kubectl get pods --no-headers=true | awk '/docker-app-chart-docker-app-chart/{print $1}'
-            - add_run_variables pod_name="$(kubectl get pods --no-headers=true | awk '/docker-app-chart-docker-app-chart/{print $1}')"
-            - add_run_variables pod_ip="$(kubectl describe pod $pod_name | grep "IP:" | awk '{print $2}')"
-            - echo "pod name is $pod_name and pod ip is $pod_ip"
-      - name: test_docker_app
-        type: Bash
-        configuration:
-          inputSteps:
-            - name: deploy_helm
-          integrations:
-            - name: ArtifactoryUnified
-        execution:
-          onStart:
-            - echo "testing docker application" #$latest_docker_ver
-          onExecute:
-            #- PAGE=$(curl -s "http://localhost:8088/index.html" | tr '[:upper:]' '[:lower:]')
-            #- if [[ $PAGE =~ "swampup" ]]; then echo "swampup found" fi
-            - if curl -Is "http://$pod_ip:8088/index.html"; then add_run_variables dockerAppStatus="pass"; else add_run_variables dockerAppStatus="fail"; fi
-            - if curl -Is "http://$pod_ip:8088/index.html"; then add_run_variables docker_promotion_repo=docker-prod-local; else add_run_variables docker_promotion_repo=docker-archive-local; fi
-          onComplete: #always
-            - echo "docker image status is $dockerAppStatus" 
-      - name: promote_docker_app
-        type: PromoteBuild
-        configuration:
-          targetRepository: ${docker_promotion_repo}
-          integrations:
-            - name: ArtifactoryUnified
-            #- name: SlackSolEng
-            - name: Github_SolEng
-          inputSteps:
-            - name: test_docker_app
-          inputResources:
-            - name: myBuildInfo
-          outputResources:
-            - name: myPromotedBuildInfo
-        execution:
-          onStart:
-            - echo "Promotion repo is $docker_promotion_repo"
-            - curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X PUT $int_ArtifactoryUnified_url/api/storage/docker-dev-local/swampup_docker_app_demo/$triggerBuildInfoNumber/manifest.json?properties=qa.functional-test=$dockerAppStatus
-            - if [ "$dockerAppStatus" == "pass" ]; then curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X DELETE $int_ArtifactoryUnified_url/docker-prod-local/swampup_docker_app_demo/latest; fi
-            #- 'curl -H "Authorization: token ${int_Github_SolEng_token}" ${int_Github_SolEng_url}/rate_limit'
-          onSuccess:
-            - if [ "$dockerAppStatus" == "pass" ]; then curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey $int_ArtifactoryUnified_url/api/docker/docker-prod-local/v2/promote -X POST -H 'Content-Type:application/json' -d '{"targetRepo":"docker-prod-local", "dockerRepository":"swampup_docker_app_demo", "tag":"'"$triggerBuildInfoNumber"'", "targetTag":"latest", "copy":true}'; fi
-            - if [ "$dockerAppStatus" == "pass" ]; then curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X PUT $int_ArtifactoryUnified_url/api/storage/docker-prod-local/swampup_docker_app_demo/latest/manifest.json?properties=docker.refersTo=$triggerBuildInfoNumber; fi
-            #- if [ "$dockerAppStatus" == "pass" ]; then send_notification SlackSolEng --text "successfully completed $pipeline_name version $my_env_var"; else send_notification SlackSolEng --text "unsuccessfully completed $pipeline_name version $my_env_var"; fi
+#   - name: swampup_docker_app_helm_deploy
+#     steps:
+#       - name: helm_build
+#         type: HelmPublish
+#         configuration:
+#           chartPath: docker-app-chart/
+#           forceXrayScan: true
+#           autoPublishBuildInfo: true        
+#           inputResources:
+#             - name: myGitRepo
+#               trigger: false
+#             - name: myBuildInfo
+#           outputResources:
+#             - name: MyHelmChart
+#             - name: myHelmBuildInfo
+#         execution:
+#           onStart:
+#             - pushd $res_myGitRepo_resourcePath/docker-app-chart
+#             - add_pipeline_variables triggerBuildInfoName="${res_myBuildInfo_buildName}"
+#             - add_pipeline_variables triggerBuildInfoNumber="${res_myBuildInfo_buildNumber}"
+#             - cat values.yaml
+#             - sed -i "s/docker.artifactory/${ArtIP}/docker/" values.yaml
+#             - sed -i "s/docker-app/swampup_docker_app_demo/" values.yaml
+#             - sed -i "s/0.1.1/0.1.$run_number/g" Chart.yaml
+#             - sed -i "s/latest/1.1.1/" values.yaml
+#             - sed -i "s/1.1.1/$triggerBuildInfoNumber/" values.yaml
+#       - name: promote_helm_chart
+#         type: PromoteBuild
+#         configuration:
+#           targetRepository: helm-prod-local
+#           integrations:
+#             - name: ArtifactoryUnified
+#           inputResources:
+#             - name: myHelmBuildInfo
+#             - name: MyHelmChart
+#           outputResources:
+#             - name: myPromotedHelmBuildInfo
+#             - name: MyPromotedHelmChart
+#       - name: deploy_helm
+#         type: HelmDeploy
+#         configuration:
+#           releaseName: docker-app-chart
+#           chartPath:   .
+#           integrations:
+#             - name: K8S_SA #SolEngUS
+#           inputResources:
+#             - name: MyPromotedHelmChart
+#           flags: '--namespace default'
+#           valueFilePaths:
+#             - values.yaml
+#         execution:
+#           onStart:
+#             - helm init --service-account tiller --tiller-namespace default
+#             - add_run_variables running_pod_name="$(kubectl get pods | awk '/docker-app-chart-docker-app-chart/{print $1}')"
+#             - if [ ! -z "$running_pod_name" ]; then kubectl delete pods $running_pod_name; fi
+#             - add_run_variables deployment_name="$(kubectl get deployments | awk '/docker-app-chart-docker-app-chart/{print $1}')"
+#             - echo "deployment name is $deployment_name"
+#             - if [ "$deployment_name" == "docker-app-chart-docker-app-chart" ]; then kubectl delete deployment docker-app-chart-docker-app-chart; fi
+#             - if [ "$deployment_name" == "docker-app-chart-docker-app-chart" ]; then sleep 20; fi
+#           onSuccess:
+#             - kubectl get pods --namespace default
+#           onComplete: #always
+#             - sleep 20
+#             - kubectl get pods --no-headers=true | awk '/docker-app-chart-docker-app-chart/{print $1}'
+#             - add_run_variables pod_name="$(kubectl get pods --no-headers=true | awk '/docker-app-chart-docker-app-chart/{print $1}')"
+#             - add_run_variables pod_ip="$(kubectl describe pod $pod_name | grep "IP:" | awk '{print $2}')"
+#             - echo "pod name is $pod_name and pod ip is $pod_ip"
+#       - name: test_docker_app
+#         type: Bash
+#         configuration:
+#           inputSteps:
+#             - name: deploy_helm
+#           integrations:
+#             - name: ArtifactoryUnified
+#         execution:
+#           onStart:
+#             - echo "testing docker application" #$latest_docker_ver
+#           onExecute:
+#             #- PAGE=$(curl -s "http://localhost:8088/index.html" | tr '[:upper:]' '[:lower:]')
+#             #- if [[ $PAGE =~ "swampup" ]]; then echo "swampup found" fi
+#             - if curl -Is "http://$pod_ip:8088/index.html"; then add_run_variables dockerAppStatus="pass"; else add_run_variables dockerAppStatus="fail"; fi
+#             - if curl -Is "http://$pod_ip:8088/index.html"; then add_run_variables docker_promotion_repo=docker-prod-local; else add_run_variables docker_promotion_repo=docker-archive-local; fi
+#           onComplete: #always
+#             - echo "docker image status is $dockerAppStatus" 
+#       - name: promote_docker_app
+#         type: PromoteBuild
+#         configuration:
+#           targetRepository: ${docker_promotion_repo}
+#           integrations:
+#             - name: ArtifactoryUnified
+#             #- name: SlackSolEng
+#             - name: Github_SolEng
+#           inputSteps:
+#             - name: test_docker_app
+#           inputResources:
+#             - name: myBuildInfo
+#           outputResources:
+#             - name: myPromotedBuildInfo
+#         execution:
+#           onStart:
+#             - echo "Promotion repo is $docker_promotion_repo"
+#             - curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X PUT $int_ArtifactoryUnified_url/api/storage/docker-dev-local/swampup_docker_app_demo/$triggerBuildInfoNumber/manifest.json?properties=qa.functional-test=$dockerAppStatus
+#             - if [ "$dockerAppStatus" == "pass" ]; then curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X DELETE $int_ArtifactoryUnified_url/docker-prod-local/swampup_docker_app_demo/latest; fi
+#             #- 'curl -H "Authorization: token ${int_Github_SolEng_token}" ${int_Github_SolEng_url}/rate_limit'
+#           onSuccess:
+#             - if [ "$dockerAppStatus" == "pass" ]; then curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey $int_ArtifactoryUnified_url/api/docker/docker-prod-local/v2/promote -X POST -H 'Content-Type:application/json' -d '{"targetRepo":"docker-prod-local", "dockerRepository":"swampup_docker_app_demo", "tag":"'"$triggerBuildInfoNumber"'", "targetTag":"latest", "copy":true}'; fi
+#             - if [ "$dockerAppStatus" == "pass" ]; then curl -u $int_ArtifactoryUnified_user:$int_ArtifactoryUnified_apikey -X PUT $int_ArtifactoryUnified_url/api/storage/docker-prod-local/swampup_docker_app_demo/latest/manifest.json?properties=docker.refersTo=$triggerBuildInfoNumber; fi
+#             #- if [ "$dockerAppStatus" == "pass" ]; then send_notification SlackSolEng --text "successfully completed $pipeline_name version $my_env_var"; else send_notification SlackSolEng --text "unsuccessfully completed $pipeline_name version $my_env_var"; fi
    
-  - name: swampup_release_mgmt
-    steps:
-      - name: release_bundle
-        type: CreateReleaseBundle
-        configuration:
-          releaseBundleName: swampup_rb
-          releaseBundleVersion: v1.0.${run_number}
-          dryRun: false
-          sign: false
-          description: "some random test description"
-          inputResources:
-            - name: myPromotedHelmBuildInfo
-              trigger: false
-            - name: myPromotedBuildInfo
-              trigger: false
-          outputResources:
-            - name: myReleaseBundle
-          releaseNotes:
-            syntax: markdown
-            content: |
-              ## Heading
-                * Bullet
-                * Points
-      - name: signBundle
-        type: SignReleaseBundle
-        configuration:
-          inputResources:
-            - name: myReleaseBundle
-          outputResources:
-            - name: mySignedReleaseBundle
+#   - name: swampup_release_mgmt
+#     steps:
+#       - name: release_bundle
+#         type: CreateReleaseBundle
+#         configuration:
+#           releaseBundleName: swampup_rb
+#           releaseBundleVersion: v1.0.${run_number}
+#           dryRun: false
+#           sign: false
+#           description: "some random test description"
+#           inputResources:
+#             - name: myPromotedHelmBuildInfo
+#               trigger: false
+#             - name: myPromotedBuildInfo
+#               trigger: false
+#           outputResources:
+#             - name: myReleaseBundle
+#           releaseNotes:
+#             syntax: markdown
+#             content: |
+#               ## Heading
+#                 * Bullet
+#                 * Points
+#       - name: signBundle
+#         type: SignReleaseBundle
+#         configuration:
+#           inputResources:
+#             - name: myReleaseBundle
+#           outputResources:
+#             - name: mySignedReleaseBundle
 
-      - name: distributeBundle
-        type: DistributeReleaseBundle
-        configuration:
-          dryRun: false
-          inputResources:
-            - name: mySignedReleaseBundle
-            - name: myDistributionRules
+#       - name: distributeBundle
+#         type: DistributeReleaseBundle
+#         configuration:
+#           dryRun: false
+#           inputResources:
+#             - name: mySignedReleaseBundle
+#             - name: myDistributionRules
