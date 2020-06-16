@@ -1,5 +1,5 @@
 #Download image from artifactory
-ARG REGISTRY=docker.artifactory-unified.soleng-us.jfrog.team
+ARG REGISTRY=docker.artifactory
 #FROM openjdk:11-jdk
 FROM $REGISTRY/openjdk:11-jdk
 
