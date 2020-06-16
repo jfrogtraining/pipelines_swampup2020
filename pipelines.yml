@@ -155,8 +155,9 @@ pipelines:
           onStart:
             #- sed -i "s/docker.artifactory/${ArtIP}/docker/g" $res_myGitRepo_resourcePath/Dockerfile
             - add_run_variables url=${ArtIP}/docker
+            - add_run_variables old=docker.artifactory
             - echo $url
-            - echo sed "s|docker.artifactory|${url}|g" $res_myGitRepo_resourcePath/Dockerfile
+            - echo sed "s|$old|$url|g" $res_myGitRepo_resourcePath/Dockerfile
             #- echo sed -i "s/docker.artifactory/ \\${url}" $res_myGitRepo_resourcePath/Dockerfile
             - sed -i "s/artifactory-unified.soleng-us.jfrog.team/${ArtIP}/" $res_myGitRepo_resourcePath/Dockerfile
             - sed -i "s/frontend-3.0.0/frontend-$previous_frontend_ver/g" $res_myGitRepo_resourcePath/Dockerfile
