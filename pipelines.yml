@@ -180,7 +180,6 @@ pipelines:
         type: HelmPublish
         configuration:
           chartPath: docker-app-chart/
-          forceXrayScan: true
           autoPublishBuildInfo: true        
           inputResources:
             - name: myGitRepo
