@@ -200,6 +200,7 @@ pipelines:
             - add_pipeline_variables triggerBuildInfoNumber="${res_myBuildInfo_buildNumber}"
             - cat $ArtifactoryIP
             - sed -i "s/docker.artifactory/docker.${ArtifactoryIP}/" values.yaml
+            - sed -i "s/docker.artifactory/docker.docker.artifactory-unified.soleng-us.jfrog.team/" values.yaml
             - cat values.yaml
             - sed -i "s/docker-app/swampup_docker_app_demo/" values.yaml
             - sed -i "s/0.1.1/0.1.$run_number/g" Chart.yaml
