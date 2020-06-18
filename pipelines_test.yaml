@@ -5,7 +5,7 @@ resources:
       gitProvider: Github_SolEng
       path: jfrogtraining/pipelines_swampup2020
       branches:
-        include: master
+        include: training
   - name: DockerAppImage
     type: Image
     configuration:
