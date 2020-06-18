@@ -199,8 +199,8 @@ pipelines:
             - add_pipeline_variables triggerBuildInfoName="${res_myBuildInfo_buildName}"
             - add_pipeline_variables triggerBuildInfoNumber="${res_myBuildInfo_buildNumber}"
             - add_pipeline_variables art_url=$(echo ${int_ArtifactoryUnified_url}|awk -F '/' '{print $3}'|awk -F ':' '{print $1}')
-            - cat $ArtifactoryIP
-            - cat $art_url
+            - echo $ArtifactoryIP
+            - echo $art_url
             - sed -i "s/docker.artifactory/docker.artifactory-unified.soleng-us.jfrog.team/" values.yaml
             - sed -i "s/docker-app/swampup_docker_app_demo/" values.yaml
             - cat values.yaml
