@@ -175,7 +175,6 @@ pipelines:
             - name: myBuildInfo
 
   - name: swampup_docker_app_helm_deploy
-    configuration:
     steps:
       - name: helm_build
         type: HelmPublish
