@@ -175,6 +175,11 @@ pipelines:
             - name: myBuildInfo
 
   - name: swampup_docker_app_helm_deploy
+    configuration:
+    environmentVariables:
+      readOnly:
+         my_env_var: '1.0.$run_number'
+         ArtIP: $(echo ${int_ArtifactoryUnified_url}|awk -F '/' '{print $3}'|awk -F ':' '{print $1}')
     steps:
       - name: helm_build
         type: HelmPublish
@@ -193,7 +198,7 @@ pipelines:
             - pushd $res_myGitRepo_resourcePath/docker-app-chart
             - add_pipeline_variables triggerBuildInfoName="${res_myBuildInfo_buildName}"
             - add_pipeline_variables triggerBuildInfoNumber="${res_myBuildInfo_buildNumber}"
-            - sed -i "s/artifactory/${ArtIP}/g" values.yaml
+            - sed -i "s/docker.artifactory/docker.${ArtIP}/g" values.yaml
             - cat values.yaml
             - sed -i "s/docker-app/swampup_docker_app_demo/" values.yaml
             - sed -i "s/0.1.1/0.1.$run_number/g" Chart.yaml
