@@ -45,17 +45,17 @@ pipelines:
             - echo $run_var
             - echo "Running $pipeline_name | $step_name on node ID $step_node_id"
       - name: bld_frontend
-          type: NpmBuild
-          configuration:
-            npmArgs: --no-progress --no-audit
-            sourceLocation: npm-frontend-service
-            repositoryName: npm
-            inputResources:
-              - name: myGitRepo
-                trigger: false
-            integrations:
-              - name: ArtifactoryUnified
-          execution:
-            onStart:
-              - add_pipeline_variables previous_frontend_ver=${my_env_var}
-              - sed -i "s/3.0.0/$my_env_var/g" $res_myGitRepo_resourcePath/npm-frontend-service/package.json     
+        type: NpmBuild
+        configuration:
+          npmArgs: --no-progress --no-audit
+          sourceLocation: npm-frontend-service
+          repositoryName: npm
+          inputResources:
+            - name: myGitRepo
+              trigger: false
+          integrations:
+            - name: ArtifactoryUnified
+        execution:
+          onStart:
+            - add_pipeline_variables previous_frontend_ver=${my_env_var}
+            - sed -i "s/3.0.0/$my_env_var/g" $res_myGitRepo_resourcePath/npm-frontend-service/package.json     
