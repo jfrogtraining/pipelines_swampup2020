@@ -11,7 +11,7 @@ resources:
     configuration:
       registry: artifactory
       sourceRepository: docker
-      imageName: docker.artifactory-unified.soleng-us.jfrog.team/swampup_docker_app_demo
+      imageName: ${(echo ${int_artifactory_url}|awk -F '/' '{print $3}')}/docker/swampup_docker_app_demo #docker.artifactory-unified.soleng-us.jfrog.team/swampup_docker_app_demo
       imageTag: '${run_number}'
       autoPull: true
   - name: myBuildInfo
@@ -153,12 +153,10 @@ pipelines:
             - name: publish_frontend #bld_frontend
         execution:
           onStart:
-            #- sed -i "s/docker.artifactory/${ArtIP}/docker/g" $res_myGitRepo_resourcePath/Dockerfile
             - add_run_variables url=${ArtIP}/docker
             - add_run_variables old=docker.artifactory
             - echo $url
             - sed -i "s|$old|$url|g" $res_myGitRepo_resourcePath/Dockerfile
-            #- echo sed -i "s/docker.artifactory/ \\${url}" $res_myGitRepo_resourcePath/Dockerfile
             - sed -i "s/artifactory-unified.soleng-us.jfrog.team/${ArtIP}/" $res_myGitRepo_resourcePath/Dockerfile
             - sed -i "s/frontend-3.0.0/frontend-$previous_frontend_ver/g" $res_myGitRepo_resourcePath/Dockerfile
             - sed -i "s/1.0.0/$previous_backend_ver/g" $res_myGitRepo_resourcePath/Dockerfile
