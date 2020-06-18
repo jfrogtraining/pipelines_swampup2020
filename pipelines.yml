@@ -13,7 +13,13 @@ resources:
       sourceRepository: docker
       imageName: docker.artifactory-unified-ha.soleng-us.jfrog.team/swampup_docker_app_demo
       imageTag: '${run_number}'
-      autoPull: true    
+      autoPull: true 
+  - name: myBuildInfo
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: ArtifactoryUnified
+      buildName: SampleApp
+      buildNumber: 1  
 pipelines:
   - name: swampup_docker_app_pipeline
     configuration:
@@ -101,3 +107,16 @@ pipelines:
           onComplete:
             - echo $step_env_var2
             - echo "Running $pipeline_name | $step_name on node ID $step_node_id"
+      - name: push_docker_app
+        type: DockerPush
+        configuration:
+          affinityGroup: fmkGroup
+          targetRepository: docker
+          forceXrayScan: true
+          autoPublishBuildInfo: true
+          integrations:
+            - name: ArtifactoryUnified
+          inputSteps:
+            - name: bld_docker_app
+          outputResources:
+            - name: myBuildInfo
