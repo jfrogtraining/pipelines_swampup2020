@@ -198,10 +198,12 @@ pipelines:
             - pushd $res_myGitRepo_resourcePath/docker-app-chart
             - add_pipeline_variables triggerBuildInfoName="${res_myBuildInfo_buildName}"
             - add_pipeline_variables triggerBuildInfoNumber="${res_myBuildInfo_buildNumber}"
+            - add_pipeline_variables art_url=$(echo ${int_ArtifactoryUnified_url}|awk -F '/' '{print $3}'|awk -F ':' '{print $1}')
             - cat $ArtifactoryIP
-            - sed -i "s/docker.artifactory/docker.${ArtifactoryIP}/" values.yaml
-            - cat values.yaml
+            - cat $art_url
+            - sed -i "s/docker.artifactory/docker.artifactory-unified.soleng-us.jfrog.team/" values.yaml
             - sed -i "s/docker-app/swampup_docker_app_demo/" values.yaml
+            - cat values.yaml
             - sed -i "s/0.1.1/0.1.$run_number/g" Chart.yaml
             - sed -i "s/latest/1.1.1/" values.yaml
             - sed -i "s/1.1.1/$triggerBuildInfoNumber/" values.yaml
