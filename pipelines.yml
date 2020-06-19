@@ -234,7 +234,7 @@ pipelines:
           onSuccess:
             - kubectl get pods --namespace default
           onComplete: #always
-            - sleep 20
+            - sleep 30
             - kubectl get pods --no-headers=true | awk '/docker-app-chart-docker-app-chart/{print $1}'
             - add_run_variables pod_name="$(kubectl get pods --no-headers=true | awk '/docker-app-chart-docker-app-chart/{print $1}')"
             - add_run_variables pod_ip="$(kubectl describe pod $pod_name | grep "IP:" | awk '{print $2}')"
