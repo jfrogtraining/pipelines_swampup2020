@@ -34,7 +34,7 @@ pipelines:
                 language: java
                 versions:
                   - "11"
-                         execution:
+        execution:
           onStart:
             - javac -version
             - mvn --version
