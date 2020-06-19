@@ -14,7 +14,7 @@ pipelines:
         readOnly:
            my_env_var: '1.0.$run_number'
            ArtIP: $(echo ${int_ArtifactoryUnified_url}|awk -F '/' '{print $3}'|awk -F ':' '{print $1}')
-   steps:
+    steps:
       - name: bld_backend
         type: MvnBuild
         configuration:
