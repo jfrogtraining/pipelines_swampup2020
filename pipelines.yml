@@ -6,6 +6,7 @@ resources:
       path: jfrogtraining/pipelines_swampup2020
       branches:
         include: training
+        
 pipelines:
   - name: swampup_docker_app_pipeline
     configuration:
