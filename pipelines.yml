@@ -73,11 +73,3 @@ pipelines:
           onStart:
             - add_pipeline_variables previous_frontend_ver=${my_env_var}
             - sed -i "s/3.0.0/$my_env_var/g" $res_myGitRepo_resourcePath/npm-frontend-service/package.json     
-      - name: publish_frontend
-        type: NpmPublish
-        configuration:
-          repositoryName: npm
-          inputSteps:
-            - name: bld_frontend
-          integrations:
-            - name: ArtifactoryUnified
