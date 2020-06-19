@@ -108,16 +108,3 @@ pipelines:
           onComplete:
             - echo $step_env_var2
             - echo "Running $pipeline_name | $step_name on node ID $step_node_id"
-      - name: push_docker_app
-        type: DockerPush
-        configuration:
-          affinityGroup: fmkGroup
-          targetRepository: docker
-          forceXrayScan: true
-          autoPublishBuildInfo: true
-          integrations:
-            - name: ArtifactoryUnified
-          inputSteps:
-            - name: bld_docker_app
-          outputResources:
-            - name: myBuildInfo
