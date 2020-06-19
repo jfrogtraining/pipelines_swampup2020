@@ -19,4 +19,4 @@ resources:
     configuration:
       sourceArtifactory: ArtifactoryUnified
       buildName: SampleApp
-      buildNumber: 1
+      buildNumber: 2
