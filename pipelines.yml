@@ -6,3 +6,17 @@ resources:
       path: jfrogtraining/pipelines_swampup2020
       branches:
         include: training
+  - name: DockerAppImage
+    type: Image
+    configuration:
+      registry: ArtifactoryUnified
+      sourceRepository: docker
+      imageName: docker.artifactory-unified-ha.soleng-us.jfrog.team/swampup_docker_app_demo
+      imageTag: '${run_number}'
+      autoPull: true
+  - name: myBuildInfo
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: ArtifactoryUnified
+      buildName: SampleApp
+      buildNumber: 1
