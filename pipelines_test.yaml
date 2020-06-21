@@ -113,7 +113,7 @@ pipelines:
         configuration:
           affinityGroup: fmkGroup
           targetRepository: docker
-          forceXrayScan: true
+          forceXrayScan: false
           autoPublishBuildInfo: true
           integrations:
             - name: ArtifactoryUnified
