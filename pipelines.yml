@@ -56,17 +56,6 @@ pipelines:
               trigger: false
           integrations:
             - name: ArtifactoryUnified
-      - name: bld_frontend
-        type: NpmBuild
-        configuration:
-          npmArgs: --no-progress --no-audit
-          sourceLocation: npm-frontend-service
-          repositoryName: npm
-          inputResources:
-            - name: myGitRepo
-              trigger: false
-          integrations:
-            - name: ArtifactoryUnified
         execution:
           onStart:
             - add_pipeline_variables previous_frontend_ver=${my_env_var}
