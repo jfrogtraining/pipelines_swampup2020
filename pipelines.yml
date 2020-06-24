@@ -84,6 +84,7 @@ pipelines:
       - name: bld_backend
         type: MvnBuild
         configuration:
+          nodePool: MyDynamicGCPNode
           sourceLocation: java-backend-service
           mvnCommand: clean install -ntp
           configFileLocation: .
