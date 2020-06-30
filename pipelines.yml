@@ -13,3 +13,33 @@ pipelines:
         readOnly:
            my_env_var: '1.0.$run_number'
            ArtIP: $(echo ${int_ArtifactoryUnified_url}|awk -F '/' '{print $3}'|awk -F ':' '{print $1}')
+    steps:
+      - name: bld_backend
+        type: MvnBuild
+        configuration:
+          sourceLocation: java-backend-service
+          mvnCommand: clean install -ntp
+          configFileLocation: .
+          configFileName: mvn-art-config
+          inputResources:
+            - name: myGitRepo
+              trigger: false
+          integrations:
+            - name: ArtifactoryUnified
+          runtime:
+            type: image
+            image:
+              auto:
+                language: java
+                versions:
+                  - "11"
+        execution:
+          onStart:
+            - javac -version
+            - mvn --version
+            - add_pipeline_variables previous_backend_ver=${my_env_var}
+            - sed -ie 's/Default-Server/ArtifactoryUnified/g' $res_myGitRepo_resourcePath/java-backend-service/mvn-art-config
+            - sed -ie "s/1.0.0/$my_env_var/g" $res_myGitRepo_resourcePath/java-backend-service/pom.xml
+          onComplete:
+            - echo $run_var
+            - echo "Running $pipeline_name | $step_name on node ID $step_node_id"
