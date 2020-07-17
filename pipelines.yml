@@ -20,7 +20,33 @@ resources:
       sourceArtifactory: ArtifactoryUnified
       buildName: SampleApp
       buildNumber: 1
-
+  - name: MyPromotedHelmChart
+    type: HelmChart
+    configuration:
+      sourceArtifactory: ArtifactoryUnified
+      repository: helm-prod-local
+      chart: docker-app-chart
+      version: '0.1.${run_number}'
+  - name: myHelmBuildInfo
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: ArtifactoryUnified
+      buildName: SampleApp
+      buildNumber: 1
+  - name: MyHelmChart
+    type: HelmChart
+    configuration:
+      sourceArtifactory: ArtifactoryUnified
+      repository: helm-local
+      chart: docker-app-chart
+      version: '0.1.${run_number}'
+  - name: myPromotedHelmBuildInfo
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: ArtifactoryUnified
+      buildName: SampleApp
+      buildNumber: 1
+      
 pipelines:
   - name: swampup_docker_app_pipeline
     configuration:
