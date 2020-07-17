@@ -14,12 +14,6 @@ resources:
       imageName: docker.artifactory-unified-ha.soleng-us.jfrog.team/swampup_docker_app_demo
       imageTag: '${run_number}'
       autoPull: true
-  - name: myBuildInfo
-    type: BuildInfo
-    configuration:
-      sourceArtifactory: ArtifactoryUnified
-      buildName: SampleApp
-      buildNumber: 1
 
 pipelines:
   - name: swampup_docker_app_pipeline
