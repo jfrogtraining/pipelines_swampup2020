@@ -64,7 +64,7 @@ pipelines:
         configuration:
           npmArgs: --no-progress --no-audit
           sourceLocation: npm-frontend-service
-          repositoryName: npm
+          repositoryName: team1-npm
           inputResources:
             - name: myGitRepo
               trigger: false
@@ -77,7 +77,7 @@ pipelines:
       - name: publish_frontend
         type: NpmPublish
         configuration:
-          repositoryName: npm
+          repositoryName: team1-npm
           inputSteps:
             - name: bld_frontend
           integrations:
@@ -113,7 +113,7 @@ pipelines:
         type: DockerPush
         configuration:
           affinityGroup: fmkGroup
-          targetRepository: docker
+          targetRepository: team1-docker
           forceXrayScan: false
           autoPublishBuildInfo: true
           integrations:
