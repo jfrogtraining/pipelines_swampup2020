@@ -62,9 +62,9 @@ pipelines:
       - name: bld_frontend
         type: NpmBuild
         configuration:
-          npmArgs: --no-progress --no-audit
+          npmArgs: --no-audit
           sourceLocation: npm-frontend-service
-          repositoryName: team1-npm
+          repositoryName: npm-dev-local
           inputResources:
             - name: myGitRepo
               trigger: false
