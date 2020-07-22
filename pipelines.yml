@@ -14,12 +14,12 @@ resources:
       imageName: ${ArtIP}/team1-docker-dev-us/swampup_docker_app_demo
       imageTag: '${run_number}'
       autoPull: true
-  - name: myOpenJDK
+  - name: myOpenJDK11
     type: Image
     configuration:
       registry: artifactory
       sourceRepository: team1-docker
-      imageName: ${ArtIP}/team1-docker/openjdk
+      imageName: ${ArtIP}/openjdk
       imageTag: '11-jdk'
       autoPull: true
   - name: myBuildInfo
@@ -103,7 +103,7 @@ pipelines:
           inputResources:
             - name: myGitRepo
               trigger: false
-            - name: myOpenJDK
+            - name: myOpenJDK11
           outputResources:
             - name: myDockerAppImage
           inputSteps:
