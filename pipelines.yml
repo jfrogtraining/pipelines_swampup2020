@@ -14,7 +14,7 @@ resources:
       imageName: docker.artifactory/mydocker_app_demo
       imageTag: '${run_number}'
       autoPull: true
-  - name: myBuildInfo
+  - name: myDockerBuildInfo
     type: BuildInfo
     configuration:
       sourceArtifactory: artifactory
@@ -121,4 +121,4 @@ pipelines:
           inputSteps:
             - name: bld_docker_app
           outputResources:
-            - name: myBuildInfo
+            - name: myDockerBuildInfo
