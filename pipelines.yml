@@ -6,7 +6,7 @@ resources:
       path: jfrogtraining/pipelines_swampup2020
       branches:
         include: training
-  - name: DockerAppImage
+  - name: myDockerAppImage
     type: Image
     configuration:
       registry: artifactory
@@ -97,7 +97,7 @@ pipelines:
             - name: myGitRepo
               trigger: false
           outputResources:
-            - name: DockerAppImage
+            - name: myDockerAppImage
           inputSteps:
             - name: bld_backend
             - name: publish_frontend #bld_frontend
