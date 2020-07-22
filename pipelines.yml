@@ -9,7 +9,7 @@ resources:
   - name: DockerAppImage
     type: Image
     configuration:
-      registry: artifactory
+      registry: artifactory2
       sourceRepository: docker
       imageName: docker.artifactory/swampup_docker_app_demo
       imageTag: '${run_number}'
@@ -17,7 +17,7 @@ resources:
   - name: myBuildInfo
     type: BuildInfo
     configuration:
-      sourceArtifactory: artifactory
+      sourceArtifactory: artifactory2
       buildName: SampleApp
       buildNumber: 1
 
@@ -27,7 +27,7 @@ pipelines:
       environmentVariables:
         readOnly:
            my_env_var: '1.0.$run_number'
-           ArtIP: $(echo ${int_ArtifactoryUnified_url}|awk -F '/' '{print $3}'|awk -F ':' '{print $1}')
+           ArtIP: $(echo ${int_artifactory_url}|awk -F '/' '{print $3}'|awk -F ':' '{print $1}')
     steps:
       - name: bld_backend
         type: MvnBuild
@@ -40,7 +40,7 @@ pipelines:
             - name: myGitRepo
               trigger: false
           integrations:
-            - name: artifactory
+            - name: artifactory2
           runtime:
             type: image
             image:
@@ -69,7 +69,7 @@ pipelines:
             - name: myGitRepo
               trigger: false
           integrations:
-            - name: artifactory
+            - name: artifactory2
         execution:
           onStart:
             - add_pipeline_variables previous_frontend_ver=${my_env_var}
@@ -81,7 +81,7 @@ pipelines:
           inputSteps:
             - name: bld_frontend
           integrations:
-            - name: artifactory
+            - name: artifactory2
 
       - name: bld_docker_app
         type: DockerBuild
@@ -92,7 +92,7 @@ pipelines:
           dockerImageName: docker.${ArtIP}/swampup_docker_app_demo
           dockerImageTag: '${run_number}'
           integrations:
-            - name: artifactory
+            - name: artifactory2
           inputResources:
             - name: myGitRepo
               trigger: false
@@ -117,7 +117,7 @@ pipelines:
           forceXrayScan: false
           autoPublishBuildInfo: true
           integrations:
-            - name: artifactory
+            - name: artifactory2
           inputSteps:
             - name: bld_docker_app
           outputResources:
