@@ -27,7 +27,6 @@ pipelines:
       environmentVariables:
         readOnly:
            my_env_var: '1.0.$run_number'
-           ArtIP: $(echo ${int_artifactory_url}|awk -F '/' '{print $3}'|awk -F ':' '{print $1}')
     steps:
       - name: bld_backend
         type: MvnBuild
@@ -103,7 +102,7 @@ pipelines:
             - name: publish_frontend #bld_frontend
         execution:
           onStart:
-            - sed -i "s/docker.artifactory/${ArtIP}:8082/g" $res_myGitRepo_resourcePath/Dockerfile
+            - 'export ArtIP=$(echo ${int_artifactory_url}|awk -F ''/'' ''{print $3}'')'
             - sed -i "s/frontend-3.0.0/frontend-$previous_frontend_ver/g" $res_myGitRepo_resourcePath/Dockerfile
             - sed -i "s/1.0.0/$previous_backend_ver/g" $res_myGitRepo_resourcePath/Dockerfile
           onComplete:
@@ -113,7 +112,7 @@ pipelines:
         type: DockerPush
         configuration:
           affinityGroup: fmkGroup
-          targetRepository: team1-docker
+          targetRepository: team1-docker-dev-us
           forceXrayScan: false
           autoPublishBuildInfo: true
           integrations:
