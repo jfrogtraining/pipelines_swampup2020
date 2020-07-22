@@ -53,7 +53,7 @@ pipelines:
             - javac -version
             - mvn --version
             - add_pipeline_variables previous_backend_ver=${my_env_var}
-            - sed -ie 's/Default-Server/artifactory/g' $res_myGitRepo_resourcePath/java-backend-service/mvn-art-config
+            - sed -ie 's/Default-Server/artifactory2/g' $res_myGitRepo_resourcePath/java-backend-service/mvn-art-config
             - sed -ie "s/1.0.0/$my_env_var/g" $res_myGitRepo_resourcePath/java-backend-service/pom.xml
           onComplete:
             - echo $run_var
