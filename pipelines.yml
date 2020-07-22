@@ -1,5 +1,5 @@
 resources:
-  - name: myGitRepo
+  - name: myGitRepo2
     type: GitRepo
     configuration:
       gitProvider: Github_SolEng
