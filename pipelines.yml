@@ -103,6 +103,7 @@ pipelines:
         execution:
           onStart:
             - 'export ArtIP=$(echo ${int_artifactory_url}|awk -F ''/'' ''{print $3}'')'
+            - sed -i "s/docker.artifactory/${ArtIP}/" $res_myGitRepo_resourcePath/Dockerfile
             - sed -i "s/frontend-3.0.0/frontend-$previous_frontend_ver/g" $res_myGitRepo_resourcePath/Dockerfile
             - sed -i "s/1.0.0/$previous_backend_ver/g" $res_myGitRepo_resourcePath/Dockerfile
           onComplete:
