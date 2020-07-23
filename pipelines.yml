@@ -1,0 +1,8 @@
+resources:
+  - name: myGitRepo
+    type: GitRepo
+    configuration:
+      gitProvider: Github_SolEng
+      path: jfrogtraining/swampup2020
+      branches:
+        include: master
