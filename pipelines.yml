@@ -100,7 +100,6 @@ pipelines:
           dockerImageTag: '${run_number}'
           integrations:
             - name: artifactory
-            - name: myDockerRegistry
           inputResources:
             - name: myGitRepo
               trigger: false
