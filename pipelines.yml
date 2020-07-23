@@ -6,3 +6,33 @@ resources:
       path: jfrogtraining/pipelines_swampup2020
       branches:
         include: training
+
+
+pipelines:
+  - name: swampup_docker_app_pipeline
+    configuration:
+      environmentVariables:
+        readOnly:
+           my_env_var: '1.0.$run_number'
+           ArtIP: $(echo ${int_ArtifactoryUnified_url}|awk -F '/' '{print $3}'|awk -F ':' '{print $1}')
+    steps:
+      - name: bld_backend
+        type: MvnBuild
+        configuration:
+          sourceLocation: java-backend-service
+          mvnCommand: clean install -ntp
+          configFileLocation: .
+          configFileName: mvn-art-config
+          inputResources:
+            - name: myGitRepo
+              trigger: false
+          integrations:
+            - name: artifactory
+            - name: myDockerRegistry
+          runtime:
+            type: image
+            image:
+              auto:
+                language: java
+                versions:
+                  - "11"
