@@ -6,3 +6,56 @@ resources:
       path: jfrogtraining/swampup2020
       branches:
         include: master
+pipelines:
+  - name: mydocker_app_pipeline
+    configuration:
+      environmentVariables:
+        readOnly:
+           my_env_var: '1.0.$run_number'
+           ArtIP: $(echo ${int_ArtifactoryUnified_url}|awk -F '/' '{print $3}'|awk -F ':' '{print $1}')
+    steps:
+      - name: bld_backend
+        type: MvnBuild
+        configuration:
+          sourceLocation: java-backend-service
+          mvnCommand: clean install -ntp
+          configFileLocation: .
+          configFileName: mvn-art-config
+          inputResources:
+            - name: myGitRepo
+              trigger: false
+          integrations:
+            - name: artifactory
+          runtime:
+            type: image
+            image:
+              auto:
+                language: java
+                versions:
+                  - "11"
+        execution:
+          onStart:
+            - javac -version
+            - mvn --version
+            - add_pipeline_variables previous_backend_ver=${my_env_var}
+            - sed -ie 's/Default-Server/artifactory/g' $res_myGitRepo_resourcePath/java-backend-service/mvn-art-config
+            - sed -ie "s/1.0.0/$my_env_var/g" $res_myGitRepo_resourcePath/java-backend-service/pom.xml
+          onComplete:
+            - echo $run_var
+            - echo "Running $pipeline_name | $step_name on node ID $step_node_id"
+
+      - name: bld_frontend
+        type: NpmBuild
+        configuration:
+          npmArgs: --no-progress --no-audit
+          sourceLocation: npm-frontend-service
+          repositoryName: npm-dev-local
+          inputResources:
+            - name: myGitRepo
+              trigger: false
+          integrations:
+            - name: artifactory
+        execution:
+          onStart:
+            - add_pipeline_variables previous_frontend_ver=${my_env_var}
+            - sed -i "s/3.0.0/$my_env_var/g" $res_myGitRepo_resourcePath/npm-frontend-service/package.json     
