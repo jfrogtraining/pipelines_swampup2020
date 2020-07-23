@@ -14,6 +14,13 @@ resources:
       imageName: docker.artifactory/swampup_docker_app_demo
       imageTag: '${run_number}'
       autoPull: true
+  
+  - name: myBuildInfo
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: artifactory
+      buildName: SampleApp
+      buildNumber: 1
 
 pipelines:
   - name: mydocker_app_pipeline
@@ -102,3 +109,16 @@ pipelines:
           onComplete:
             - echo $step_env_var2
             - echo "Running $pipeline_name | $step_name on node ID $step_node_id"
+      - name: push_docker_app
+        type: DockerPush
+        configuration:
+          affinityGroup: fmkGroup
+          targetRepository: team1-docker
+          forceXrayScan: false
+          autoPublishBuildInfo: true
+          integrations:
+            - name: artifactory
+          inputSteps:
+            - name: bld_docker_app
+          outputResources:
+            - name: myBuildInfo
