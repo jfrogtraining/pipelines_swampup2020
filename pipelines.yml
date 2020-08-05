@@ -42,8 +42,8 @@ resources:
     type: DistributionRule
     configuration:
       sourceDistribution: distribution
-      serviceName: "Edge*"
-      siteName: "Edge*"
+      serviceName: "edge*"
+      siteName: "edge*"
       cityName: "*"
       countryCodes:
         - "*"
@@ -184,7 +184,7 @@ pipelines:
           sign: false
           description: "some random test description"
           inputResources:
-            - name: myBuildInfo
+            - name: myPromotedBuildInfo
               trigger: false
           outputResources:
             - name: myReleaseBundle
