@@ -11,7 +11,7 @@ resources:
     configuration:
       registry: artifactory
       sourceRepository: docker
-      imageName: ${(echo ${int_artifactory_url}|awk -F '/' '{print $3}')}/docker/swampup_docker_app_demo #docker.artifactory-unified.soleng-us.jfrog.team/swampup_docker_app_demo
+      imageName: ${(echo ${int_artifactory_url}|awk -F '/' '{print $3}')}/docker/docker_app_demo #docker.artifactory-unified.soleng-us.jfrog.team/swampup_docker_app_demo
       imageTag: '${run_number}'
       autoPull: true
   - name: myBuildInfo
@@ -139,7 +139,7 @@ pipelines:
           affinityGroup: fmkGroup
           dockerFileLocation: .
           dockerFileName: Dockerfile
-          dockerImageName: ${ArtIP}/docker/swampup_docker_app_demo
+          dockerImageName: ${ArtIP}/docker/docker_app_demo
           dockerImageTag: '${run_number}'
           integrations:
             - name: artifactory
