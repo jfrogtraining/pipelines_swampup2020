@@ -74,7 +74,7 @@ resources:
       countryCodes:
         - "*"
 pipelines:
-  - name: swampup_docker_app_pipeline
+  - name: docker_app_pipeline
     configuration:
       environmentVariables:
         readOnly:
@@ -287,41 +287,38 @@ pipelines:
 #             - if [ "$dockerAppStatus" == "pass" ]; then curl -u $int_artifactory_user:$int_artifactory_apikey -X PUT $int_artifactory_url/api/storage/docker-prod-local/swampup_docker_app_demo/latest/manifest.json?properties=docker.refersTo=$triggerBuildInfoNumber; fi
 #             #- if [ "$dockerAppStatus" == "pass" ]; then send_notification SlackSolEng --text "successfully completed $pipeline_name version $my_env_var"; else send_notification SlackSolEng --text "unsuccessfully completed $pipeline_name version $my_env_var"; fi
    
-#   - name: swampup_release_mgmt
-#     steps:
-#       - name: release_bundle
-#         type: CreateReleaseBundle
-#         configuration:
-#           releaseBundleName: swampup_rb
-#           releaseBundleVersion: v1.0.${run_number}
-#           dryRun: false
-#           sign: false
-#           description: "some random test description"
-#           inputResources:
-#             - name: myPromotedHelmBuildInfo
-#               trigger: false
-#             - name: myPromotedBuildInfo
-#               trigger: false
-#           outputResources:
-#             - name: myReleaseBundle
-#           releaseNotes:
-#             syntax: markdown
-#             content: |
-#               ## Heading
-#                 * Bullet
-#                 * Points
-#       - name: signBundle
-#         type: SignReleaseBundle
-#         configuration:
-#           inputResources:
-#             - name: myReleaseBundle
-#           outputResources:
-#             - name: mySignedReleaseBundle
-
-#       - name: distributeBundle
-#         type: DistributeReleaseBundle
-#         configuration:
-#           dryRun: false
-#           inputResources:
-#             - name: mySignedReleaseBundle
-#             - name: myDistributionRules
+   - name: release_mgmt
+     steps:
+       - name: release_bundle
+         type: CreateReleaseBundle
+         configuration:
+           releaseBundleName: swampup_rb
+           releaseBundleVersion: v1.0.${run_number}
+           dryRun: false
+           sign: false
+           description: "some random test description"
+           inputResources:
+             - name: myPromotedBuildInfo
+               trigger: false
+           outputResources:
+             - name: myReleaseBundle
+           releaseNotes:
+             syntax: markdown
+             content: |
+               ## Heading
+                 * Bullet
+                 * Points
+       - name: signBundle
+         type: SignReleaseBundle
+         configuration:
+           inputResources:
+             - name: myReleaseBundle
+           outputResources:
+             - name: mySignedReleaseBundle
+       - name: distributeBundle
+         type: DistributeReleaseBundle
+         configuration:
+           dryRun: false
+           inputResources:
+             - name: mySignedReleaseBundle
+             - name: myDistributionRules
