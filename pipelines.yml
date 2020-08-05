@@ -11,7 +11,7 @@ resources:
     configuration:
       registry: artifactory
       sourceRepository: docker
-      imageName: ${(echo ${int_artifactory_url}|awk -F '/' '{print $3}')}/docker/docker_app_demo #docker.artifactory-unified.soleng-us.jfrog.team/swampup_docker_app_demo
+      imageName: ${(echo ${int_artifactory_url}|awk -F '/' '{print $3}')}/docker/docker_app_demo
       imageTag: '${run_number}'
       autoPull: true
   - name: myBuildInfo
