@@ -163,7 +163,7 @@ pipelines:
           sign: false
           description: "some random test description"
           inputResources:
-            - name: myPromotedBuildInfo
+            - name: myBuildInfo
               trigger: false
           outputResources:
             - name: myReleaseBundle
