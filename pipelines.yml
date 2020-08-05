@@ -151,7 +151,29 @@ pipelines:
             - name: bld_docker_app
           outputResources:
             - name: myBuildInfo
-
+      - name: promote_docker_app
+        type: PromoteBuild
+        configuration:
+          targetRepository: docker-prod-local
+          integrations:
+            - name: artifactory
+            - name: Github_SolEng
+          inputSteps:
+            - name: push_docker_app
+          inputResources:
+            - name: myBuildInfo
+          outputResources:
+            - name: myPromotedBuildInfo
+        execution:
+          onStart:
+            - echo "Promoting docker app"
+            - add_pipeline_variables triggerBuildInfoNumber="${res_myBuildInfo_buildNumber}"
+            - curl -u $int_artifactory_user:$int_artifactory_apikey -X PUT $int_artifactory_url/api/storage/docker-stage-local/docker_app_demo/$triggerBuildInfoNumber/manifest.json?properties=qa.functional-test=pass
+            - curl -u $int_artifactory_user:$int_artifactory_apikey -X DELETE $int_artifactory_url/docker-prod-local/docker_app_demo/latest
+          onSuccess:
+            - curl -u $int_artifactory_user:$int_artifactory_apikey $int_artifactory_url/api/docker/docker-prod-local/v2/promote -X POST -H 'Content-Type:application/json' -d '{"targetRepo":"docker-prod-local", "dockerRepository":"docker_app_demo", "tag":"'"$triggerBuildInfoNumber"'", "targetTag":"latest", "copy":true}'
+            - curl -u $int_artifactory_user:$int_artifactory_apikey -X PUT $int_artifactory_url/api/storage/docker-prod-local/docker_app_demo/latest/manifest.json?properties=docker.refersTo=$triggerBuildInfoNumber
+  
   - name: release_mgmt
     steps:
       - name: release_bundle
