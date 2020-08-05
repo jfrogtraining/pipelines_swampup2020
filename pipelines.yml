@@ -157,7 +157,6 @@ pipelines:
           targetRepository: docker-prod-local
           integrations:
             - name: artifactory
-            - name: Github_SolEng
           inputSteps:
             - name: push_docker_app
           inputResources:
