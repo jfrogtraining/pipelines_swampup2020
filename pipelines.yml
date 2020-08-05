@@ -26,43 +26,17 @@ resources:
       sourceArtifactory: artifactory
       buildName: SampleApp
       buildNumber: 1
-  - name: myHelmBuildInfo
-    type: BuildInfo
-    configuration:
-      sourceArtifactory: artifactory
-      buildName: SampleApp
-      buildNumber: 1
-  - name: myPromotedHelmBuildInfo
-    type: BuildInfo
-    configuration:
-      sourceArtifactory: artifactory
-      buildName: SampleApp
-      buildNumber: 1
-  - name: MyHelmChart
-    type: HelmChart
-    configuration:
-      sourceArtifactory: artifactory
-      repository: helm-local
-      chart: docker-app-chart
-      version: '0.1.${run_number}'
-  - name: MyPromotedHelmChart
-    type: HelmChart
-    configuration:
-      sourceArtifactory: artifactory
-      repository: helm-prod-local
-      chart: docker-app-chart
-      version: '0.1.${run_number}'
   - name: myReleaseBundle
     type: ReleaseBundle
     configuration:
       sourceDistribution: distribution
-      name: swampup_rb
+      name: demo_rb
       version: v1.0.0
   - name: mySignedReleaseBundle
     type: ReleaseBundle
     configuration:
       sourceDistribution: distribution
-      name: swampup_rb
+      name: demo_rb
       version: v1.0.0
   - name: myDistributionRules
     type: DistributionRule
@@ -292,7 +266,7 @@ pipelines:
       - name: release_bundle
         type: CreateReleaseBundle
         configuration:
-          releaseBundleName: swampup_rb
+          releaseBundleName: demo_rb
           releaseBundleVersion: v1.0.${run_number}
           dryRun: false
           sign: false
