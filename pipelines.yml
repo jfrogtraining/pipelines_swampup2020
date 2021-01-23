@@ -11,7 +11,7 @@ resources:
     configuration:
       registry: etrainingArtifactory
       sourceRepository: docker
-      imageName: docker.artifactory/swampup_docker_app_demo
+      imageName: docker.etrainingArtifactory/swampup_docker_app_demo
       imageTag: '${run_number}'
       autoPull: true
   - name: myBuildInfo
