@@ -41,7 +41,7 @@ pipelines:
             - name: myGitRepo
               trigger: false
           integrations:
-            - name: artifactory
+            - name: etrainingArtifactory
             - name: myDockerRegistry
           runtime:
             type: image
