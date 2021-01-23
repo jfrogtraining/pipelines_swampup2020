@@ -9,7 +9,7 @@ resources:
   - name: DockerAppImage
     type: Image
     configuration:
-      registry: artifactory
+      registry: etrainingArtifactory
       sourceRepository: docker
       imageName: docker.artifactory/swampup_docker_app_demo
       imageTag: '${run_number}'
