@@ -2,7 +2,7 @@ resources:
   - name: myGitRepo
     type: GitRepo
     configuration:
-      gitProvider: Github_SolEng
+      gitProvider: frankzhu2003Github
       path: jfrogtraining/pipelines_swampup2020
       branches:
         include: training
