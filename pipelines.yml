@@ -65,7 +65,7 @@ pipelines:
         configuration:
           npmArgs: --no-progress --no-audit
           sourceLocation: npm-frontend-service
-          repositoryName: npm-dev-local
+          repositoryName: npm-local
           inputResources:
             - name: myGitRepo
               trigger: false
