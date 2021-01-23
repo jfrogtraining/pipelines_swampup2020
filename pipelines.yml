@@ -42,7 +42,7 @@ pipelines:
               trigger: false
           integrations:
             - name: etrainingArtifactory
-            - name: myDockerRegistry
+            #- name: myDockerRegistry
           runtime:
             type: image
             image:
