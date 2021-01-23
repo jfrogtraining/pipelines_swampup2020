@@ -17,7 +17,7 @@ resources:
   - name: myBuildInfo
     type: BuildInfo
     configuration:
-      sourceArtifactory: artifactory
+      sourceArtifactory: etrainingArtifactory
       buildName: SampleApp
       buildNumber: 1
 
