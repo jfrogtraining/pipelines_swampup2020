@@ -70,7 +70,7 @@ pipelines:
             - name: myGitRepo
               trigger: false
           integrations:
-            - name: artifactory
+            - name: etrainingArtifactory
         execution:
           onStart:
             - add_pipeline_variables previous_frontend_ver=${my_env_var}
@@ -82,7 +82,7 @@ pipelines:
           inputSteps:
             - name: bld_frontend
           integrations:
-            - name: artifactory
+            - name: etrainingArtifactory
       - name: bld_docker_app
         type: DockerBuild
         configuration:
@@ -92,7 +92,7 @@ pipelines:
           dockerImageName: docker.${ArtIP}/swampup_docker_app_demo
           dockerImageTag: '${run_number}'
           integrations:
-            - name: artifactory
+            - name: etrainingArtifactory
           inputResources:
             - name: myGitRepo
               trigger: false
@@ -117,7 +117,7 @@ pipelines:
           forceXrayScan: true
           autoPublishBuildInfo: true
           integrations:
-            - name: artifactory
+            - name: etrainingArtifactory
           inputSteps:
             - name: bld_docker_app
           outputResources:
