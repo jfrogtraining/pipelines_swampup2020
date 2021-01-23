@@ -3,7 +3,7 @@ resources:
     type: GitRepo
     configuration:
       gitProvider: frankzhu2003Github
-      path: jfrogtraining/pipelines_swampup2020
+      path: frankzhu2003/pipelines_swampup2020
       branches:
         include: training
   - name: DockerAppImage
