@@ -10,12 +10,12 @@ RUN apt-get update && apt-get upgrade -y && \
 WORKDIR /app
 
 #Define ARG Again -ARG variables declared before the first FROM need to be declered again
-ARG REGISTRY=https://etrainning.jfrog.io
+#ARG REGISTRY=https://etrainning.jfrog.io
 MAINTAINER Shani Levy
 
 # Download artifacts from Artifactory
-RUN curl $REGISTRY/libs-release-local/com/jfrog/backend/1.0.0/backend-1.0.0.jar --output server1.jar
-RUN curl $REGISTRY/npm-local/frontend/-/frontend-3.0.0.tgz --output client1.tgz
+RUN curl https://etrainning.jfrog.io/libs-release-local/com/jfrog/backend/1.0.0/backend-1.0.0.jar --output server1.jar
+RUN curl https://etrainning.jfrog.io/npm-local/frontend/-/frontend-3.0.0.tgz --output client1.tgz
 
 #Extract vue app
 RUN tar -xzf client1.tgz && rm client1.tgz
