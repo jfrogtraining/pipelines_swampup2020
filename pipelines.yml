@@ -115,7 +115,7 @@ pipelines:
         type: DockerPush
         configuration:
           affinityGroup: fmkGroup
-          targetRepository: team1-docker
+          targetRepository: docker
           forceXrayScan: true
           autoPublishBuildInfo: true
           integrations:
