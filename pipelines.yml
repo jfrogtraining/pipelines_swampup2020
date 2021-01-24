@@ -60,6 +60,7 @@ pipelines:
           onComplete:
             - echo $run_var
             - echo "Running $pipeline_name | $step_name on node ID $step_node_id"
+            - echo "ArtIP ========================= $ArtIP"
       - name: bld_frontend
         type: NpmBuild
         configuration:
