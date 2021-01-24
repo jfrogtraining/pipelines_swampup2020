@@ -14,8 +14,10 @@ WORKDIR /app
 MAINTAINER Shani Levy
 
 # Download artifacts from Artifactory
-RUN curl https://etrainning.jfrog.io/artifactory/libs-release-local/com/jfrog/backend/1.0.10/backend-1.0.10.jar --output server1.jar
-RUN curl https://etrainning.jfrog.io/artifactory/npm-local/frontend/-/frontend-1.0.5.tgz --output client1.tgz
+RUN wget https://etrainning.jfrog.io/artifactory/libs-release-local/com/jfrog/backend/1.0.10/backend-1.0.10.jar
+RUN mv ./backend-1.0.10.jar server1.jar
+RUN wget https://etrainning.jfrog.io/artifactory/npm-local/frontend/-/frontend-1.0.5.tgz
+RUN mv ./frontend-1.0.5.tgz client1.tgz
 
 #Extract vue app
 RUN tar -xzf client1.tgz && rm client1.tgz
