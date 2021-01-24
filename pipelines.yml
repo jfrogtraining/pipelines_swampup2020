@@ -91,7 +91,7 @@ pipelines:
           affinityGroup: fmkGroup
           dockerFileLocation: .
           dockerFileName: Dockerfile
-          dockerImageName: docker.${ArtIP}/swampup_docker_app_demo
+          dockerImageName: ${ArtIP}/docker/swampup_docker_app_demo
           dockerImageTag: '${run_number}'
           integrations:
             - name: etrainingArtifactory
@@ -115,7 +115,7 @@ pipelines:
         type: DockerPush
         configuration:
           affinityGroup: fmkGroup
-          targetRepository: etrainingArtifactory/docker
+          targetRepository: docker
           forceXrayScan: true
           autoPublishBuildInfo: true
           integrations:
