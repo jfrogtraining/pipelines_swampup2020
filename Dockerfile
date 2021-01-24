@@ -1,7 +1,7 @@
 #Download image from artifactory
 ARG REGISTRY=docker.artifactory
 #FROM openjdk:11-jdk
-FROM $REGISTRY/openjdk:11-jdk
+FROM $REGISTRY/docker/openjdk:11-jdk
 
 RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y nodejs \
@@ -15,7 +15,7 @@ MAINTAINER Shani Levy
 
 # Download artifacts from Artifactory
 RUN curl $REGISTRY/libs-release-local/com/jfrog/backend/1.0.0/backend-1.0.0.jar --output server1.jar
-RUN curl $REGISTRY/npm-dev-local/frontend/-/frontend-3.0.0.tgz --output client1.tgz
+RUN curl $REGISTRY/npm-local/frontend/-/frontend-3.0.0.tgz --output client1.tgz
 
 #Extract vue app
 RUN tar -xzf client1.tgz && rm client1.tgz
